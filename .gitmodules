@@ -1,0 +1,3 @@
+[submodule "woff2"]
+	path = woff2
+	url = https://github.com/google/woff2.git
