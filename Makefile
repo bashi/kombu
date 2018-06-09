@@ -5,6 +5,7 @@ OUTDIR := out
 WOFF2_DIR := woff2
 
 OBJDIR := $(OUTDIR)/obj
+DISTDIR := dist/
 
 all: ffi
 	@:
@@ -12,8 +13,9 @@ all: ffi
 # brotli
 
 BROTLI_DIR := $(WOFF2_DIR)/brotli
+BROTLI_LIB_A := $(BROTLI_DIR)/libbrotli.a
 
-$(BROTLI_DIR)/libbrotli.a:
+$(BROTLI_LIB_A):
 	$(MAKE) -C $(BROTLI_DIR) lib
 
 # woff2
@@ -23,6 +25,7 @@ WOFF2_SRC_FILES := font.cc \
   glyph.cc \
 	normalize.cc \
 	table_tags.cc \
+	transform.cc \
 	variable_length.cc \
 	woff2_common.cc \
 	woff2_dec.cc \
@@ -47,10 +50,9 @@ $(OBJDIR)/%.o: $(WOFF2_DIR)/src/%.cc
 
 FFI_OBJS := $(FFI_SRCS:%.cc=%.o)
 
-ffi: $(WOFF2_LIB_A) ffi.cc
-	emcc -I$(WOFF2_DIR)/include ffi.cc -o $(OBJDIR)/ffi.js $(WOFF2_LIB_A) \
+ffi: $(WOFF2_LIB_A) $(BROTLI_LIB_A) ffi.cc
+	emcc $(CXXFLAGS) -I$(WOFF2_DIR)/include ffi.cc -o $(DISTDIR)/ffi.js $(WOFF2_LIB_A) $(BROTLI_LIB_A) \
 	  -s ALLOW_MEMORY_GROWTH=1 \
-		-s EXPORTED_FUNCTIONS='["_get_max_compressed_size"]' \
 		-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]'
 
 $(OBJDIR)/%.o: %.cc
