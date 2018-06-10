@@ -1,3 +1,7 @@
 out/
 *.a
 *.o
+node_modules/
+dist/*.js
+dist/*.wasm
+tmp/

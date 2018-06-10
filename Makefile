@@ -52,8 +52,8 @@ FFI_OBJS := $(FFI_SRCS:%.cc=%.o)
 
 ffi: $(WOFF2_LIB_A) $(BROTLI_LIB_A) ffi.cc
 	emcc $(CXXFLAGS) -I$(WOFF2_DIR)/include ffi.cc -o $(DISTDIR)/ffi.js $(WOFF2_LIB_A) $(BROTLI_LIB_A) \
-	  -s ALLOW_MEMORY_GROWTH=1 \
-		-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]'
+	  -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 \
+	  -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]'
 
 $(OBJDIR)/%.o: %.cc
 	$(CXX) -c -MMD $(CXXFLAGS) -I$(BROTLI_DIR)/c/include -I$(WOFF2_DIR)/include -o $@ $<

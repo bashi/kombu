@@ -1,0 +1,27 @@
+{
+  "name": "kombu",
+  "version": "0.1.0",
+  "description": "A font format converter",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "ava -v test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bashi/kombu.git"
+  },
+  "keywords": [
+    "woff2",
+    "opentype"
+  ],
+  "author": "Kenichi Ishibashi <ishibashi.kenichi@gmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "ava": "^0.25.0",
+    "typescript": "^2.9.1"
+  },
+  "dependencies": {
+    "zlibjs": "^0.3.1"
+  }
+}
