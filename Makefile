@@ -41,7 +41,7 @@ WOFF2_LIB_A := $(OBJDIR)/libwoff2.a
 
 $(WOFF2_LIB_A): dirs $(WOFF2_OBJS)
 	rm -f $(WOFF2_LIB_A)
-	ar -crs $(WOFF2_LIB_A) $(WOFF2_OBJS)
+	emar crs $(WOFF2_LIB_A) $(WOFF2_OBJS)
 
 $(OBJDIR)/%.o: $(WOFF2_DIR)/src/%.cc
 	$(CXX) -c -MMD $(CXXFLAGS) -I$(BROTLI_DIR)/c/include -I$(WOFF2_DIR)/include -o $@ $<

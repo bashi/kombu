@@ -1,5 +1,6 @@
-// TODO: Remove these low-level apis
-export { readFont } from './font-reader';
-export { tagToString } from './tag';
+export { Woff2 } from './woff2';
 
-export { convert } from './convert';
+import { readFont } from './font-reader';
+import { OtfBuilder } from './otf-builder';
+import { isSfntLikeFont } from './sfnt';
+import { isWoffFont, isWoff2Font } from './woff';

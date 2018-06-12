@@ -15,9 +15,20 @@ export function isWoffFont(version: number): boolean {
   return version === WOFF_SIGNATURE;
 }
 
+// TODO: Move elsewhere
+const WOFF2_SIGNATURE = 0x774f4632; // wOF2
+export function isWoff2Font(version: number): boolean {
+  return version === WOFF2_SIGNATURE;
+}
+
 const TAG_HEAD = stringToTag('head');
 
-function decompressTable(data: Uint8Array): Uint8Array {
+function compressTable(data: Uint8Array): Uint8Array {
+  const res = Zlib.deflateSync(data);
+  return res;
+}
+
+function uncompressTable(data: Uint8Array): Uint8Array {
   const res = Zlib.inflateSync(data);
   return res;
 }
@@ -106,13 +117,13 @@ export class WoffReader {
     if (entry.compLength === entry.origLength) {
       return tableData;
     }
-    const decompressed = decompressTable(tableData);
-    if (decompressed.byteLength !== entry.origLength) {
+    const uncompressed = uncompressTable(tableData);
+    if (uncompressed.byteLength !== entry.origLength) {
       throw new Error(
         'uncompressed size mismatch: ' + tableData.byteLength + ' != ' + entry.origLength
       );
     }
-    return decompressed;
+    return uncompressed;
   }
 
   // TODO: Make this private
@@ -194,11 +205,19 @@ export class WoffBuilder {
   }
 
   private maybeCompressTable(orig: Uint8Array): Uint8Array {
-    throw new Error('Not implemented');
+    const compressed = compressTable(orig);
+    if (compressed.byteLength < orig.byteLength) {
+      return compressed;
+    }
+    return orig;
   }
 
   private writeTable(table: Uint8Array) {
-    throw new Error('Not implemented');
+    this.writer.writeBytes(table);
+    const padLength = 4 - (table.byteLength & 3);
+    if (padLength > 0) {
+      this.writer.pad(padLength);
+    }
   }
 
   build(): Uint8Array {
@@ -206,8 +225,13 @@ export class WoffBuilder {
     const totalSfntSize = SFNT_HEADER_SIZE + SFNT_TABLE_ENTRY_SIZE * numTables;
     const tableStartPosition = WOFF_HEADER_SIZE + WOFF_TABLE_ENTRY_SIZE * numTables;
     this.writer.seek(tableStartPosition);
-    this.writeTablesAndBuildEntries();
+    const res = this.writeTablesAndBuildEntries();
 
-    throw 'Not implemented';
+    // TODO: Support metadata and private data.
+
+    this.writer.seek(0);
+    this.writeHeader(numTables, res.totalSize, totalSfntSize);
+    this.writeTablesAndBuildEntries();
+    return this.writer.result();
   }
 }

@@ -1,5 +1,5 @@
 // @ts-ignore
-import * as Module from './ffi';
+import * as Module from './ffi.js';
 
 export class Woff2 {
   private mod: any;
@@ -8,7 +8,7 @@ export class Woff2 {
     this.mod = mod;
   }
 
-  compress(data: Uint8Array): Uint8Array {
+  compress(data: Uint8Array): Uint8Array | null {
     const inSize = data.byteLength;
     const inOffset = this.mod._malloc(inSize);
     this.mod.HEAPU8.set(data, inOffset);
@@ -37,7 +37,7 @@ export class Woff2 {
     return res;
   }
 
-  uncompress(data: Uint8Array): Uint8Array {
+  uncompress(data: Uint8Array): Uint8Array | null {
     const inSize = data.byteLength;
     const inOffset = this.mod._malloc(inSize);
     this.mod.HEAPU8.set(data, inOffset);
