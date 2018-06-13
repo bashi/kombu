@@ -106,17 +106,24 @@ async function createWoff2() {
   return woff2.create(wasmBinary);
 }
 
+// These are global objects to make tests faster
+let woff2Obj = null;
+let converter = null;
+
+test.before(async t => {
+  woff2Obj = await createWoff2();
+  converter = new Converter(woff2Obj);
+});
+
 test('woff2 compress', async t => {
-  const w = await createWoff2();
   const data = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.TTF'));
-  const compressed = w.compress(data);
+  const compressed = woff2Obj.compress(data);
   t.true(compressed.byteLength > 0);
 });
 
 test('woff2 uncompress', async t => {
-  const w = await createWoff2();
   const data = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.woff2'));
-  const uncompressed = w.uncompress(data);
+  const uncompressed = woff2Obj.uncompress(data);
   t.true(uncompressed.byteLength > 0);
 });
 
@@ -138,13 +145,7 @@ test('getFontFormat', t => {
   t.deepEqual(format4, 'unsupported');
 });
 
-async function createConverter() {
-  const woff2 = await createWoff2();
-  return new Converter(woff2);
-}
-
 test('Converter.toTtf', async t => {
-  const converter = await createConverter();
   const inputWoff2 = readFileAsUint8Array(
     path.resolve(__dirname, 'data', 'ahem', 'AHEM____.woff2')
   );
@@ -172,7 +173,6 @@ test('Converter.toTtf', async t => {
 });
 
 test('Converter.toWoff', async t => {
-  const converter = await createConverter();
   const inputWoff2 = readFileAsUint8Array(
     path.resolve(__dirname, 'data', 'ahem', 'AHEM____.woff2')
   );
@@ -200,7 +200,6 @@ test('Converter.toWoff', async t => {
 });
 
 test('Converter.toWoff2', async t => {
-  const converter = await createConverter();
   const inputWoff2 = readFileAsUint8Array(
     path.resolve(__dirname, 'data', 'ahem', 'AHEM____.woff2')
   );
