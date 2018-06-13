@@ -158,7 +158,7 @@ test('Converter.toTtf', async t => {
   t.true(outputWoff instanceof Uint8Array);
   t.deepEqual(getFontFormat(outputWoff), 'ttf');
 
-  const inputTTF = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.ttf'));
+  const inputTTF = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.TTF'));
   const outputTTF = converter.toTtf(inputTTF);
   t.true(outputTTF instanceof Uint8Array);
   t.deepEqual(getFontFormat(outputTTF), 'ttf');
@@ -185,7 +185,7 @@ test('Converter.toWoff', async t => {
   t.true(outputWoff instanceof Uint8Array);
   t.deepEqual(getFontFormat(outputWoff), 'woff');
 
-  const inputTTF = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.ttf'));
+  const inputTTF = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.TTF'));
   const outputTTF = converter.toWoff(inputTTF);
   t.true(outputTTF instanceof Uint8Array);
   t.deepEqual(getFontFormat(outputTTF), 'woff');
@@ -212,7 +212,7 @@ test('Converter.toWoff2', async t => {
   t.true(outputWoff instanceof Uint8Array);
   t.deepEqual(getFontFormat(outputWoff), 'woff2');
 
-  const inputTTF = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.ttf'));
+  const inputTTF = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.TTF'));
   const outputTTF = converter.toWoff2(inputTTF);
   t.true(outputTTF instanceof Uint8Array);
   t.deepEqual(getFontFormat(outputTTF), 'woff2');
