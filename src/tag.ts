@@ -20,12 +20,6 @@ export function tagToString(tag: number): string {
   );
 }
 
-const SFNT_VERSION_WOFF = 0x774f4646; // wOFF
-
-export function fixed16dot16(upper: number, lower: number): number {
-  return ((upper << 16) | lower) & 0xffffffff;
-}
-
 export function calculateTableChecksum(table: Uint8Array): number {
   let sum = 0;
   let value;

@@ -3,27 +3,26 @@ import * as path from 'path';
 import test from 'ava';
 
 import * as tag from '../dist/tag';
-import { readFont, getFontFormat } from '../dist/font-reader';
-import { OtfBuilder } from '../dist/otf-builder';
-import { DataViewReader } from '../dist/dataview-reader';
+import { Reader } from '../dist/reader';
+import { OtfBuilder } from '../dist/otf';
 import { WoffReader, WoffBuilder, WOFF_SIGNATURE } from '../dist/woff';
 import * as woff2 from '../dist/woff2';
-import { Converter } from '../dist/convert';
+import { readAsSfnt, getFontFormat, Converter } from '../dist/convert';
 
 function readFileAsUint8Array(pathname) {
   const buffer = fs.readFileSync(pathname);
   return new Uint8Array(buffer);
 }
 
-function readFontFile(filename) {
+function readFontFileAsSfnt(filename) {
   const pathname = path.resolve(__dirname, 'data', 'ahem', filename);
   const buffer = fs.readFileSync(pathname);
-  const data = new Uint8Array(buffer).buffer;
-  return readFont(data);
+  const data = new Uint8Array(buffer);
+  return readAsSfnt(data);
 }
 
 function ahemFontTTF() {
-  return readFontFile('AHEM____.TTF');
+  return readFontFileAsSfnt('AHEM____.TTF');
 }
 
 test('Read TTF', t => {
@@ -32,7 +31,7 @@ test('Read TTF', t => {
 });
 
 test('Read WOFF', t => {
-  const sfnt = readFontFile('AHEM____.woff');
+  const sfnt = readFontFileAsSfnt('AHEM____.woff');
   t.deepEqual(sfnt.numTables(), 17);
 });
 
@@ -40,15 +39,15 @@ test('OtfBuilder', t => {
   const sfnt = ahemFontTTF();
   const builder = new OtfBuilder(sfnt);
   const out = builder.build();
-  const outSfnt = readFont(out.buffer);
+  const outSfnt = readAsSfnt(out);
   t.deepEqual(sfnt.numTables(), outSfnt.numTables());
 });
 
 function createWoffReader() {
   const pathname = path.resolve(__dirname, 'data', 'ahem', 'AHEM____.woff');
   const buffer = fs.readFileSync(pathname);
-  const data = new Uint8Array(buffer).buffer;
-  const dataReader = DataViewReader.createFromArrayBuffer(data);
+  const data = new Uint8Array(buffer);
+  const dataReader = new Reader(data);
   return new WoffReader(dataReader);
 }
 

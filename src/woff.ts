@@ -1,25 +1,20 @@
-import { DataViewReader } from './dataview-reader';
-import { Sfnt, isSfntLikeFont } from './sfnt';
+import { Sfnt } from './sfnt';
+import { Reader } from './reader';
+import { Writer } from './writer';
 import { stringToTag, calculateTableChecksum } from './tag';
-import { SFNT_HEADER_SIZE, SFNT_TABLE_ENTRY_SIZE } from './otf-builder';
+import { SFNT_HEADER_SIZE, SFNT_TABLE_ENTRY_SIZE, isOtfFont } from './otf';
 
 // @ts-ignore
 import * as Zlib from 'zlibjs';
-import { Writer } from './writer';
 
 export const WOFF_SIGNATURE = 0x774f4646; // 'wOFF'
-export const WOFF_HEADER_SIZE = 44;
-export const WOFF_TABLE_ENTRY_SIZE = 20;
 
 export function isWoffFont(version: number): boolean {
   return version === WOFF_SIGNATURE;
 }
 
-// TODO: Move elsewhere
-const WOFF2_SIGNATURE = 0x774f4632; // wOF2
-export function isWoff2Font(version: number): boolean {
-  return version === WOFF2_SIGNATURE;
-}
+export const WOFF_HEADER_SIZE = 44;
+export const WOFF_TABLE_ENTRY_SIZE = 20;
 
 const TAG_HEAD = stringToTag('head');
 
@@ -50,9 +45,9 @@ interface TableEntry {
 }
 
 export class WoffReader {
-  private reader: DataViewReader;
+  private reader: Reader;
 
-  constructor(reader: DataViewReader) {
+  constructor(reader: Reader) {
     this.reader = reader;
   }
 
@@ -73,7 +68,7 @@ export class WoffReader {
       throw new Error('Invalid WOFF signature: ' + signature);
     }
     const flavor = this.reader.readULong();
-    if (!isSfntLikeFont(flavor)) {
+    if (!isOtfFont(flavor)) {
       throw new Error('Unknown flavor: ' + flavor);
     }
     const length = this.reader.readULong();

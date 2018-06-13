@@ -1,8 +1,14 @@
 // @ts-ignore
 import * as Module from './ffi.js';
 
+const WOFF2_SIGNATURE = 0x774f4632; // wOF2
+
+export function isWoff2Font(version: number): boolean {
+  return version === WOFF2_SIGNATURE;
+}
+
 export class Woff2 {
-  private mod: any;
+  private mod: any; // |mod| is an Emscripten Module.
 
   constructor(mod: any) {
     this.mod = mod;

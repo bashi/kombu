@@ -1,13 +1,9 @@
-export class DataViewReader {
+export class Reader {
   private view: DataView;
   private position: number;
 
-  static createFromArrayBuffer(buffer: ArrayBuffer): DataViewReader {
-    return new DataViewReader(new DataView(buffer));
-  }
-
-  constructor(view: DataView) {
-    this.view = view;
+  constructor(data: Uint8Array) {
+    this.view = new DataView(data.buffer);
     this.position = 0;
   }
 
