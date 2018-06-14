@@ -126,7 +126,7 @@ test('woff2 uncompress', async t => {
 test('getFontFormat', t => {
   const data = new Uint8Array([0x4f, 0x54, 0x54, 0x4f]);
   const format = getFontFormat(data);
-  t.deepEqual(format, 'ttf');
+  t.deepEqual(format, 'otf');
 
   const data2 = new Uint8Array([0x77, 0x4f, 0x46, 0x46]);
   const format2 = getFontFormat(data2);
@@ -141,30 +141,30 @@ test('getFontFormat', t => {
   t.deepEqual(format4, 'unsupported');
 });
 
-test('Converter.toTtf', async t => {
+test('Converter.toOtf', async t => {
   const inputWoff2 = readFileAsUint8Array(
     path.resolve(__dirname, 'data', 'ahem', 'AHEM____.woff2')
   );
-  const outputWoff2 = converter.toTtf(inputWoff2);
+  const outputWoff2 = converter.toOtf(inputWoff2);
   t.true(outputWoff2 instanceof Uint8Array);
-  t.deepEqual(getFontFormat(outputWoff2), 'ttf');
+  t.deepEqual(getFontFormat(outputWoff2), 'otf');
 
   const inputWoff = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.woff'));
-  const outputWoff = converter.toTtf(inputWoff);
+  const outputWoff = converter.toOtf(inputWoff);
   t.true(outputWoff instanceof Uint8Array);
-  t.deepEqual(getFontFormat(outputWoff), 'ttf');
+  t.deepEqual(getFontFormat(outputWoff), 'otf');
 
   const inputTTF = readFileAsUint8Array(path.resolve(__dirname, 'data', 'ahem', 'AHEM____.TTF'));
-  const outputTTF = converter.toTtf(inputTTF);
+  const outputTTF = converter.toOtf(inputTTF);
   t.true(outputTTF instanceof Uint8Array);
-  t.deepEqual(getFontFormat(outputTTF), 'ttf');
+  t.deepEqual(getFontFormat(outputTTF), 'otf');
 
   const inputEmpty = new Uint8Array();
-  const outputEmpty = converter.toTtf(inputEmpty);
+  const outputEmpty = converter.toOtf(inputEmpty);
   t.deepEqual(outputEmpty, null);
 
   const inputInvalid = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05]);
-  const outputInvalid = converter.toTtf(inputInvalid);
+  const outputInvalid = converter.toOtf(inputInvalid);
   t.deepEqual(outputInvalid, null);
 });
 

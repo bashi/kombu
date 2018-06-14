@@ -23,8 +23,8 @@ async function onFileSelected(file: File): Promise<Uint8Array> {
 }
 
 function convert(converter: Converter, data: Uint8Array, outFormat: Format): Uint8Array {
-  if (outFormat === Format.TTF) {
-    return converter.toTtf(data)!;
+  if (outFormat === Format.OTF) {
+    return converter.toOtf(data)!;
   } else if (outFormat === Format.WOFF) {
     return converter.toWoff(data)!;
   } else if (outFormat === Format.WOFF2) {

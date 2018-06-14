@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
+    "copy-ffi": "cp dist/ffi.wasm public/",
     "bundle": "yarn build && yarn webpack",
     "test": "ava -v test"
   },
