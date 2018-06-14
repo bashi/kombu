@@ -1,13 +1,13 @@
 module.exports = {
-  mode: "production",
+  mode: 'production',
   entry: {
-    app: "./dist/index.js"
+    app: './dist/bundle.js'
   },
   output: {
-    path: __dirname + "/public",
-    filename: "bundle.js"
+    path: __dirname + '/public',
+    filename: 'bundle.js'
   },
   node: {
-    fs: "empty"
+    fs: 'empty'
   }
-}
+};

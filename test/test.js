@@ -6,7 +6,7 @@ import * as tag from '../dist/tag';
 import { Reader } from '../dist/reader';
 import { OtfBuilder } from '../dist/otf';
 import { WoffReader, WoffBuilder, WOFF_SIGNATURE } from '../dist/woff';
-import * as woff2 from '../dist/woff2';
+import { createWoff2 } from '../dist/woff2';
 import { readAsSfnt, getFontFormat, Converter } from '../dist/convert';
 
 function readFileAsUint8Array(pathname) {
@@ -100,18 +100,14 @@ test('WoffBuilder', t => {
   t.deepEqual(getFontFormat(out), 'woff');
 });
 
-async function createWoff2() {
-  const wasmPath = path.resolve(__dirname, '..', 'dist', 'ffi.wasm');
-  const wasmBinary = readFileAsUint8Array(wasmPath);
-  return woff2.create(wasmBinary);
-}
-
 // These are global objects to make tests faster
 let woff2Obj = null;
 let converter = null;
 
 test.before(async t => {
-  woff2Obj = await createWoff2();
+  const wasmPath = path.resolve(__dirname, '..', 'dist', 'ffi.wasm');
+  const wasmBinary = readFileAsUint8Array(wasmPath);
+  woff2Obj = await createWoff2(wasmBinary);
   converter = new Converter(woff2Obj);
 });
 

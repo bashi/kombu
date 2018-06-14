@@ -5,4 +5,5 @@ node_modules/
 dist/*.js
 dist/*.wasm
 tmp/
-public/bundle.js
+public/*.js
+public/*.wasm

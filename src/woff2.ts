@@ -72,7 +72,7 @@ export class Woff2 {
   }
 }
 
-export function create(wasmBinary: Uint8Array): Promise<Woff2> {
+export function createWoff2(wasmBinary: Uint8Array): Promise<Woff2> {
   return new Promise((resolve, reject) => {
     let mod: any = null;
     const args = {
