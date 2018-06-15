@@ -105,11 +105,16 @@ class ConvertWorker {
 
     return promise;
   }
+
+  terminate() {
+    this.worker.terminate();
+  }
 }
 
 async function convert(data: Uint8Array, format: Format): Promise<Uint8Array> {
   const worker = await createConvertWorker();
   const res = await worker.convert(data, format);
+  worker.terminate();
   return res.output as Uint8Array;
 }
 
