@@ -1,14 +1,4 @@
-import { Converter, Format } from './convert';
-import { Woff2, createWoff2 } from './woff2';
-
-async function loadWoff2Wasm(): Promise<Woff2> {
-  return fetch('ffi.wasm')
-    .then(response => response.arrayBuffer())
-    .then(buffer => {
-      const wasmBinary = new Uint8Array(buffer);
-      return createWoff2(wasmBinary);
-    });
-}
+import { Format } from './convert';
 
 async function onFileSelected(file: File): Promise<Uint8Array> {
   const fileReader = new FileReader();
@@ -20,18 +10,6 @@ async function onFileSelected(file: File): Promise<Uint8Array> {
   });
   fileReader.readAsArrayBuffer(file);
   return promise;
-}
-
-function convert(converter: Converter, data: Uint8Array, outFormat: Format): Uint8Array {
-  if (outFormat === Format.OTF) {
-    return converter.toOtf(data)!;
-  } else if (outFormat === Format.WOFF) {
-    return converter.toWoff(data)!;
-  } else if (outFormat === Format.WOFF2) {
-    return converter.toWoff2(data)!;
-  } else {
-    throw new Error(`Unsupported format: ${outFormat}`);
-  }
 }
 
 function createDownloadLink(data: Uint8Array): HTMLAnchorElement {
@@ -48,10 +26,94 @@ function getBasename(filename: string): string {
   return filename.substr(0, suffixPos);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const woff2Wasm = await loadWoff2Wasm();
-  const converter = new Converter(woff2Wasm);
+const WORKER_INIT_TIMEOUT_MS = 5000;
 
+function createConvertWorker(): Promise<ConvertWorker> {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker('worker.js');
+    const timeout = setTimeout(() => reject(new Error('Worker time out')), WORKER_INIT_TIMEOUT_MS);
+    worker.postMessage('init');
+    const listener = (e: MessageEvent) => {
+      if (e.data.name === 'initialized') {
+        clearTimeout(timeout);
+        worker.removeEventListener('message', listener);
+        resolve(new ConvertWorker(worker));
+      } else if (e.data.name === 'error') {
+        reject(new Error(e.data.message));
+      }
+    };
+    worker.addEventListener('message', listener);
+  });
+}
+
+class ConvertWorker {
+  private worker: Worker;
+  private messageId: number;
+  private pendings: Map<number, (res: any) => void>;
+  private timeouts: Map<number, number>;
+
+  constructor(worker: Worker) {
+    this.worker = worker;
+    this.messageId = 0;
+    this.pendings = new Map();
+    this.timeouts = new Map();
+
+    this.worker.addEventListener('message', e => {
+      const messageId = e.data.messageId;
+      if (typeof messageId !== 'number') {
+        console.warn(`Received invalid message from worker: ${e}`);
+        return;
+      }
+      const timeout = this.timeouts.get(messageId);
+      if (timeout) {
+        clearTimeout(timeout);
+        this.timeouts.delete(messageId);
+      }
+
+      const resolve = this.pendings.get(messageId);
+      if (resolve) {
+        resolve(e.data);
+        this.pendings.delete(messageId);
+      }
+    });
+  }
+
+  // TODO: Define the return type
+  async convert(data: Uint8Array, format: Format, timeout?: number): Promise<any> {
+    const promise = new Promise<Uint8Array>((resolve, reject) => {
+      this.worker.postMessage(
+        {
+          messageId: this.messageId,
+          action: 'convert',
+          input: data,
+          format: format
+        },
+        [data.buffer]
+      );
+      this.pendings.set(this.messageId, resolve);
+      if (timeout) {
+        this.timeouts.set(
+          this.messageId,
+          setTimeout(() => {
+            this.pendings.delete(this.messageId);
+            reject(new Error('Convert time out'));
+          }, timeout)
+        );
+      }
+      this.messageId += 1;
+    });
+
+    return promise;
+  }
+}
+
+async function convert(data: Uint8Array, format: Format): Promise<Uint8Array> {
+  const worker = await createConvertWorker();
+  const res = await worker.convert(data, format);
+  return res.output as Uint8Array;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   const inputFile = document.querySelector('#input-file');
   if (!inputFile) {
     throw new Error('No input-file element');
@@ -69,11 +131,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // TODO: Don't use type assertion.
     const format = outputFormatEl.value as Format;
 
-    // TODO: Use worker to avoid busy loop in the main thread.
-    const output = convert(converter, data, format);
-
+    const output = await convert(data, format);
     const link = createDownloadLink(output);
     const basename = getBasename(file.name);
+
     link.download = `${basename}.${format}`;
     link.innerHTML = `Download ${basename}.${format}`;
 
