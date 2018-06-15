@@ -1,4 +1,5 @@
-import { Converter, Format } from './convert';
+import { Format, isValidFormat } from './format';
+import { Converter } from './convert';
 import { Woff2, createWoff2 } from './woff2';
 
 async function loadWoff2Wasm(): Promise<Woff2> {
@@ -53,8 +54,11 @@ self.addEventListener('message', async e => {
 
   const action = e.data.action;
   if (action === 'convert') {
-    // TODO: Don't use type assertion.
-    const format = e.data.format as Format;
+    const format = e.data.format;
+    if (!isValidFormat(format)) {
+      console.warn(`Invalid font format: ${format}`);
+      return;
+    }
     const input = e.data.input;
     const output = convert(converter, input, format);
     // TODO: Figure out why transferring doesn't work other than Chrome.

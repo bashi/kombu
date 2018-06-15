@@ -1,4 +1,4 @@
-import { Format } from './convert';
+import { Format, isValidFormat, getFilenameSuffix } from './format';
 
 async function onFileSelected(file: File): Promise<Uint8Array> {
   const fileReader = new FileReader();
@@ -128,15 +128,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!(outputFormatEl instanceof HTMLInputElement)) {
       throw new Error('No output format element');
     }
-    // TODO: Don't use type assertion.
-    const format = outputFormatEl.value as Format;
+
+    const format = outputFormatEl.value;
+    if (!isValidFormat(format)) {
+      throw new Error(`Invalid font format: ${format}`);
+    }
 
     const output = await convert(data, format);
     const link = createDownloadLink(output);
     const basename = getBasename(file.name);
 
-    link.download = `${basename}.${format}`;
-    link.innerHTML = `Download ${basename}.${format}`;
+    const suffix = getFilenameSuffix(output);
+    link.download = `${basename}.${suffix}`;
+    link.innerHTML = `Download ${basename}.${suffix}`;
 
     const downloadEl = document.querySelector('#download-container');
     if (!downloadEl) {

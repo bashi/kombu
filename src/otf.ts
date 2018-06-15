@@ -20,6 +20,13 @@ export function isOtfFont(version: number): boolean {
   );
 }
 
+export function getOtfFilenameSuffix(version: number): string {
+  if (version === SFNT_VERSION_OTTO) return 'otf';
+  if (version === SFNT_VERSION_TYP1 || version === SFNT_VERSION_TRUE || SFNT_VERSION_V1)
+    return 'ttf';
+  throw new Error(`Invalid font version: ${version}`);
+}
+
 export class OtfReader {
   private reader: Reader;
 

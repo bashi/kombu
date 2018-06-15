@@ -7,7 +7,8 @@ import { Reader } from '../dist/reader';
 import { OtfBuilder } from '../dist/otf';
 import { WoffReader, WoffBuilder, WOFF_SIGNATURE } from '../dist/woff';
 import { createWoff2 } from '../dist/woff2';
-import { readAsSfnt, getFontFormat, Converter } from '../dist/convert';
+import { readAsSfnt, Converter } from '../dist/convert';
+import { getFontFormat } from '../dist/format';
 
 function readFileAsUint8Array(pathname) {
   const buffer = fs.readFileSync(pathname);

@@ -1,25 +1,9 @@
 import { Sfnt } from './sfnt';
 import { Reader } from './reader';
-import { isOtfFont, OtfBuilder, OtfReader } from './otf';
-import { isWoffFont, WoffBuilder, WoffReader } from './woff';
-import { isWoff2Font, Woff2 } from './woff2';
-
-export const enum Format {
-  OTF = 'otf',
-  WOFF = 'woff',
-  WOFF2 = 'woff2',
-  UNSUPPORTED = 'unsupported'
-}
-
-export function getFontFormat(data: Uint8Array): Format {
-  if (data.byteLength < 4) return Format.UNSUPPORTED;
-
-  const version = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
-  if (isOtfFont(version)) return Format.OTF;
-  if (isWoffFont(version)) return Format.WOFF;
-  if (isWoff2Font(version)) return Format.WOFF2;
-  return Format.UNSUPPORTED;
-}
+import { OtfBuilder, OtfReader } from './otf';
+import { WoffBuilder, WoffReader } from './woff';
+import { Woff2 } from './woff2';
+import { Format, getFontFormat } from './format';
 
 interface FontReader {
   read(): Sfnt;
