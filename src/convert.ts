@@ -32,7 +32,7 @@ export class Converter {
     this.woff2 = woff2;
   }
 
-  toOtf(data: Uint8Array): Uint8Array | null {
+  toOtf(data: Uint8Array): Uint8Array {
     const format = getFontFormat(data);
     if (format === Format.OTF) return data;
     if (format === Format.WOFF2) {
@@ -43,10 +43,10 @@ export class Converter {
       const builder = new OtfBuilder(sfnt);
       return builder.build();
     }
-    return null;
+    throw new Error(`Unsupported format: ${format}`);
   }
 
-  toWoff(data: Uint8Array): Uint8Array | null {
+  toWoff(data: Uint8Array): Uint8Array {
     const format = getFontFormat(data);
     if (format === Format.WOFF) return data;
     if (format === Format.OTF) {
@@ -56,15 +56,14 @@ export class Converter {
     }
     if (format === Format.WOFF2) {
       const uncompressed = this.woff2.uncompress(data);
-      if (uncompressed === null) return null;
       const sfnt = readAsSfnt(uncompressed);
       const builder = new WoffBuilder(sfnt);
       return builder.build();
     }
-    return null;
+    throw new Error(`Unsupported format: ${format}`);
   }
 
-  toWoff2(data: Uint8Array): Uint8Array | null {
+  toWoff2(data: Uint8Array): Uint8Array {
     const format = getFontFormat(data);
     if (format === Format.WOFF2) return data;
     if (format === Format.OTF) {
@@ -76,6 +75,6 @@ export class Converter {
       const ttf = builder.build();
       return this.woff2.compress(ttf);
     }
-    return null;
+    throw new Error(`Unsupported format: ${format}`);
   }
 }

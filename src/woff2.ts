@@ -7,6 +7,8 @@ export function isWoff2Font(version: number): boolean {
   return version === WOFF2_SIGNATURE;
 }
 
+// TODO: More error handling?
+
 export class Woff2 {
   private mod: any; // |mod| is an Emscripten Module.
 
@@ -14,7 +16,7 @@ export class Woff2 {
     this.mod = mod;
   }
 
-  compress(data: Uint8Array): Uint8Array | null {
+  compress(data: Uint8Array): Uint8Array {
     const inSize = data.byteLength;
     const inOffset = this.mod._malloc(inSize);
     this.mod.HEAPU8.set(data, inOffset);
@@ -36,14 +38,17 @@ export class Woff2 {
       [inOffset, inSize, outOffset, maxOutSize]
     );
 
-    const res = outSize > 0 ? this.mod.HEAPU8.subarray(outOffset, outOffset + outSize) : null;
+    if (outSize === 0) {
+      throw new Error('woff2: Failed to compress');
+    }
+    const res = this.mod.HEAPU8.subarray(outOffset, outOffset + outSize);
 
     this.mod._free(inOffset);
     this.mod._free(outOffset);
     return res;
   }
 
-  uncompress(data: Uint8Array): Uint8Array | null {
+  uncompress(data: Uint8Array): Uint8Array {
     const inSize = data.byteLength;
     const inOffset = this.mod._malloc(inSize);
     this.mod.HEAPU8.set(data, inOffset);
@@ -64,7 +69,10 @@ export class Woff2 {
       [outOffset, uncompressSize, inOffset, inSize]
     );
 
-    const res = outSize > 0 ? this.mod.HEAPU8.subarray(outOffset, outOffset + outSize) : null;
+    if (outSize === 0) {
+      throw new Error('woff2: Failed to uncompress');
+    }
+    const res = this.mod.HEAPU8.subarray(outOffset, outOffset + outSize);
 
     this.mod._free(inOffset);
     this.mod._free(outOffset);

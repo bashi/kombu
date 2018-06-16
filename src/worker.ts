@@ -12,20 +12,44 @@ async function loadWoff2Wasm(): Promise<Woff2> {
 }
 
 function convert(converter: Converter, data: Uint8Array, format: Format): Uint8Array {
-  // TODO: Might be better to change toFoo() not return null.
   if (format === Format.OTF) {
-    return converter.toOtf(data)!;
+    return converter.toOtf(data);
   } else if (format === Format.WOFF) {
-    return converter.toWoff(data)!;
+    return converter.toWoff(data);
   } else if (format === Format.WOFF2) {
-    return converter.toWoff2(data)!;
+    return converter.toWoff2(data);
   } else {
-    // ???
     throw new Error(`Unsupported format: ${format}`);
   }
 }
 
 let converter: Converter | null = null;
+
+function handleMessage(e: MessageEvent) {
+  if (!converter) {
+    throw new Error('Worker not initialized');
+  }
+
+  const messageId = e.data.messageId;
+  if (typeof messageId !== 'number') {
+    throw new Error('Received a message without messageId');
+  }
+
+  const action = e.data.action;
+  if (action === 'convert') {
+    const format = e.data.format;
+    if (!isValidFormat(format)) {
+      throw new Error(`Invalid font format: ${format}`);
+    }
+    const input = e.data.input;
+    const output = convert(converter, input, format);
+    // TODO: Figure out why transferring doesn't work other than Chrome.
+    // Transferring doesn't work only when converting to woff2, so emscripten's
+    // memory system may be related.
+    // @ts-ignore: self is DedicatedWorkerGlobalScope
+    self.postMessage({ messageId: messageId, output: output });
+  }
+}
 
 self.addEventListener('message', async e => {
   // Special case for initialization.
@@ -33,37 +57,14 @@ self.addEventListener('message', async e => {
     const wasmBinary = await loadWoff2Wasm();
     converter = new Converter(wasmBinary);
     // @ts-ignore: self is DedicatedWorkerGlobalScope
-    self.postMessage({
-      name: 'initialized'
-    });
+    self.postMessage('initialized');
     return;
   }
 
-  if (!converter) {
-    console.warn('Worker not initialized');
-    return;
-  }
-
-  const messageId = e.data.messageId;
-  if (typeof messageId !== 'number') {
-    console.warn('Received a message without messageId');
-    return;
-  }
-
-  // TODO: Think of a way to handle errors/exceptions
-
-  const action = e.data.action;
-  if (action === 'convert') {
-    const format = e.data.format;
-    if (!isValidFormat(format)) {
-      console.warn(`Invalid font format: ${format}`);
-      return;
-    }
-    const input = e.data.input;
-    const output = convert(converter, input, format);
-    // TODO: Figure out why transferring doesn't work other than Chrome.
-    //self.postMessage({ messageId: messageId, output: output }, [output.buffer]);
+  try {
+    handleMessage(e);
+  } catch (exception) {
     // @ts-ignore: self is DedicatedWorkerGlobalScope
-    self.postMessage({ messageId: messageId, output: output });
+    self.postMessage(exception);
   }
 });

@@ -34,7 +34,7 @@ function createConvertWorker(): Promise<ConvertWorker> {
     const timeout = setTimeout(() => reject(new Error('Worker time out')), WORKER_INIT_TIMEOUT_MS);
     worker.postMessage('init');
     const listener = (e: MessageEvent) => {
-      if (e.data.name === 'initialized') {
+      if (e.data === 'initialized') {
         clearTimeout(timeout);
         worker.removeEventListener('message', listener);
         resolve(new ConvertWorker(worker));

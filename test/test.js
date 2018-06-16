@@ -161,12 +161,14 @@ test('Converter.toOtf', async t => {
   t.deepEqual(getFontFormat(outputTTF), 'otf');
 
   const inputEmpty = new Uint8Array();
-  const outputEmpty = converter.toOtf(inputEmpty);
-  t.deepEqual(outputEmpty, null);
+  t.throws(() => {
+    converter.toOtf(inputEmpty);
+  }, Error);
 
   const inputInvalid = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05]);
-  const outputInvalid = converter.toOtf(inputInvalid);
-  t.deepEqual(outputInvalid, null);
+  t.throws(() => {
+    converter.toOtf(inputInvalid);
+  }, Error);
 });
 
 test('Converter.toWoff', async t => {
@@ -188,12 +190,14 @@ test('Converter.toWoff', async t => {
   t.deepEqual(getFontFormat(outputTTF), 'woff');
 
   const inputEmpty = new Uint8Array();
-  const outputEmpty = converter.toWoff(inputEmpty);
-  t.deepEqual(outputEmpty, null);
+  t.throws(() => {
+    converter.toWoff(inputEmpty);
+  }, Error);
 
   const inputInvalid = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05]);
-  const outputInvalid = converter.toWoff(inputInvalid);
-  t.deepEqual(outputInvalid, null);
+  t.throws(() => {
+    converter.toWoff(inputInvalid);
+  }, Error);
 });
 
 test('Converter.toWoff2', async t => {
@@ -215,10 +219,12 @@ test('Converter.toWoff2', async t => {
   t.deepEqual(getFontFormat(outputTTF), 'woff2');
 
   const inputEmpty = new Uint8Array();
-  const outputEmpty = converter.toWoff2(inputEmpty);
-  t.deepEqual(outputEmpty, null);
+  t.throws(() => {
+    converter.toWoff2(inputEmpty);
+  }, Error);
 
   const inputInvalid = new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05]);
-  const outputInvalid = converter.toWoff2(inputInvalid);
-  t.deepEqual(outputInvalid, null);
+  t.throws(() => {
+    converter.toWoff2(inputInvalid);
+  }, Error);
 });
