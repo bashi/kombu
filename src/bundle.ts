@@ -46,10 +46,15 @@ function createConvertWorker(): Promise<ConvertWorker> {
   });
 }
 
+interface Pending {
+  resolve: (res: any) => void;
+  reject: (res: any) => void;
+}
+
 class ConvertWorker {
   private worker: Worker;
   private messageId: number;
-  private pendings: Map<number, (res: any) => void>;
+  private pendings: Map<number, Pending>;
   private timeouts: Map<number, number>;
 
   constructor(worker: Worker) {
@@ -70,10 +75,20 @@ class ConvertWorker {
         this.timeouts.delete(messageId);
       }
 
-      const resolve = this.pendings.get(messageId);
-      if (resolve) {
-        resolve(e.data);
+      const pending = this.pendings.get(messageId);
+      if (pending) {
+        if (e.data.error) {
+          pending.reject(new Error(e.data.error));
+        } else {
+          pending.resolve(e.data.response);
+        }
         this.pendings.delete(messageId);
+        return;
+      }
+
+      if (e.data.error) {
+        this.terminate();
+        throw new Error(e.data.error);
       }
     });
   }
@@ -90,7 +105,7 @@ class ConvertWorker {
         },
         [data.buffer]
       );
-      this.pendings.set(this.messageId, resolve);
+      this.pendings.set(this.messageId, { resolve: resolve, reject: reject });
       if (timeout) {
         this.timeouts.set(
           this.messageId,
@@ -141,7 +156,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     throw new Error('No spinner element');
   }
 
+  const errorMessageEl = document.querySelector('#error-message-container');
+  if (!errorMessageEl) {
+    throw new Error('No error message container');
+  }
+
   const convertFile = async (file: File) => {
+    errorMessageEl.classList.add('error-message-off');
+    try {
+      const output = await convertFileInternal(file);
+      return output;
+    } catch (exception) {
+      errorMessageEl.classList.remove('error-message-off');
+      errorMessageEl.innerHTML = exception.message;
+      spinner.classList.add('spinner-off');
+      downloadEl.innerHTML = '';
+    }
+  };
+
+  const convertFileInternal = async (file: File) => {
     const data = await fileToUint8Array(file);
 
     const outputFormatEl = document.querySelector('input[name=output-format]:checked');

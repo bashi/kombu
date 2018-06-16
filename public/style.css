@@ -57,3 +57,12 @@ footer {
 .spinner-off {
   display: none;
 }
+
+#error-message-container {
+  font-weight: bold;
+  color: red;
+}
+
+.error-message-off {
+  display: none;
+}

@@ -25,14 +25,9 @@ function convert(converter: Converter, data: Uint8Array, format: Format): Uint8A
 
 let converter: Converter | null = null;
 
-function handleMessage(e: MessageEvent) {
+function handleMessage(messageId: number, e: MessageEvent) {
   if (!converter) {
     throw new Error('Worker not initialized');
-  }
-
-  const messageId = e.data.messageId;
-  if (typeof messageId !== 'number') {
-    throw new Error('Received a message without messageId');
   }
 
   const action = e.data.action;
@@ -43,11 +38,14 @@ function handleMessage(e: MessageEvent) {
     }
     const input = e.data.input;
     const output = convert(converter, input, format);
+    const response = {
+      output: output
+    };
     // TODO: Figure out why transferring doesn't work other than Chrome.
     // Transferring doesn't work only when converting to woff2, so emscripten's
     // memory system may be related.
     // @ts-ignore: self is DedicatedWorkerGlobalScope
-    self.postMessage({ messageId: messageId, output: output });
+    self.postMessage({ messageId: messageId, response: response });
   }
 }
 
@@ -61,10 +59,17 @@ self.addEventListener('message', async e => {
     return;
   }
 
+  const messageId = e.data.messageId;
+  if (typeof messageId !== 'number') {
+    // @ts-ignore: self is DedicatedWorkerGlobalScope
+    self.postMessage({ error: 'Received a message without messageId' });
+    return;
+  }
+
   try {
-    handleMessage(e);
+    handleMessage(messageId, e);
   } catch (exception) {
     // @ts-ignore: self is DedicatedWorkerGlobalScope
-    self.postMessage(exception);
+    self.postMessage({ messageId: messageId, error: exception.message });
   }
 });
