@@ -8,6 +8,23 @@ html, body {
   margin: 0;
 }
 
+button {
+  font-size: 1rem;
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  text-decoration: none;
+  color: #0067b8;
+  background: transparent;
+  border: solid 2px #0067b8;
+  border-radius: 2px;
+  transition: .2s;
+}
+
+button:hover {
+  background: #0067b8;
+  color: white;
+}
+
 a {
   color: #0067b8;
   text-decoration: none;
@@ -50,8 +67,11 @@ footer {
 
 #input-select-zone {
   text-align: center;
-  border: 1px solid #ccc;
+  border: 2px solid #ccc;
+  border-radius: 3px;
   padding: 1rem;
+  color: #888;
+  font-weight: bold;
 }
 
 .spinner-off {

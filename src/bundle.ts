@@ -126,11 +126,52 @@ class ConvertWorker {
   }
 }
 
-async function convert(data: Uint8Array, format: Format): Promise<Uint8Array> {
+interface ConvertResult {
+  output: Uint8Array;
+  processTime: number;
+}
+
+// |data| will be transferred to worker.
+async function convert(data: Uint8Array, format: Format): Promise<ConvertResult> {
+  const t0 = performance.now();
   const worker = await createConvertWorker();
   const res = await worker.convert(data, format);
   worker.terminate();
-  return res.output as Uint8Array;
+  const t1 = performance.now();
+  return {
+    output: res.output,
+    processTime: t1 - t0
+  };
+}
+
+const BYTE_SUFFIXES = [' B', ' kB', ' MB'];
+const BYTE_MARGIN = 1024;
+
+function formatFilesize(amount: number): string {
+  let index = 0;
+  while (amount > 1000 + BYTE_MARGIN && index < BYTE_SUFFIXES.length) {
+    amount /= 1000;
+    index += 1;
+  }
+  const suffix = BYTE_SUFFIXES[index];
+  if (amount > 100) {
+    return amount.toFixed(0) + suffix;
+  } else {
+    return amount.toFixed(1) + suffix;
+  }
+}
+
+function formatProcessTime(t: number): string {
+  if (t < 1000) {
+    return t.toFixed(0) + 'ms';
+  }
+  const sec = t / 1000;
+  return sec.toFixed(1) + 's';
+}
+
+function formatConversionRatio(before: number, after: number): string {
+  const ratio = (after / before) * 100;
+  return ratio.toFixed(1) + '%';
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -142,9 +183,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!selectFileButton) {
     throw new Error('No select-file-button element');
   }
-  const downloadEl = document.querySelector('#download-container');
-  if (!downloadEl) {
-    throw new Error('No download container');
+  const convertResultEl = document.querySelector('#convert-result-container');
+  if (!convertResultEl) {
+    throw new Error('No convert result container');
   }
 
   selectFileButton.addEventListener('click', () => {
@@ -170,12 +211,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       errorMessageEl.classList.remove('error-message-off');
       errorMessageEl.innerHTML = exception.message;
       spinner.classList.add('spinner-off');
-      downloadEl.innerHTML = '';
+      convertResultEl.innerHTML = '';
     }
   };
 
   const convertFileInternal = async (file: File) => {
     const data = await fileToUint8Array(file);
+    const originalByteLength = data.byteLength;
 
     const outputFormatEl = document.querySelector('input[name=output-format]:checked');
     if (!(outputFormatEl instanceof HTMLInputElement)) {
@@ -187,10 +229,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       throw new Error(`Invalid font format: ${format}`);
     }
 
-    downloadEl.innerHTML = '';
+    convertResultEl.innerHTML = '';
     spinner.classList.remove('spinner-off');
 
-    const output = await convert(data, format);
+    const result = await convert(data, format);
+    const output = result.output;
+
+    const originalFileSize = formatFilesize(originalByteLength);
+    const convertedFileSize = formatFilesize(output.byteLength);
+    const processTime = formatProcessTime(result.processTime);
+    const ratio = formatConversionRatio(originalByteLength, output.byteLength);
+
+    const summaryEl = document.createElement('div');
+    summaryEl.innerHTML = `
+    <div>Size comparison: ${originalFileSize} → ${convertedFileSize} (${ratio})</div>
+    <div>Process time: ${processTime}</div>
+    `;
+    convertResultEl.appendChild(summaryEl);
+
     const link = createDownloadLink(output);
     const basename = getBasename(file.name);
 
@@ -198,7 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     link.download = `${basename}.${suffix}`;
     link.innerHTML = `Download ${basename}.${suffix}`;
 
-    downloadEl.appendChild(link);
+    convertResultEl.appendChild(link);
     spinner.classList.add('spinner-off');
   };
 
