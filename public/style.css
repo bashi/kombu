@@ -1,0 +1,59 @@
+:root {
+  --max-width: 768px;
+}
+
+html, body {
+  font-family: sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: #0067b8;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  padding: 0 2rem 0 2rem;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+header {
+  color: #555;
+  padding: 0 2rem 0 2rem;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  margin-bottom: 0;
+}
+
+header h1 a {
+  color: #555 !important;
+  text-decoration: none !important;
+}
+
+footer {
+  margin: 1rem 0 1rem 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+#input-select-zone {
+  text-align: center;
+  border: 1px solid #ccc;
+  padding: 1rem;
+}
+
+.spinner-off {
+  display: none;
+}

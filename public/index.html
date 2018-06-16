@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Font format converter</title>
   <!-- TODO: Figure out why async doesn't work -->
   <script defer src="bundle.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <input id="input-file" type="file">
-  <div>
-    <input type="radio" id="output-format-otf" name="output-format" value="otf">
-    <label for="output-format-otf">TTF/OTF</label>
-    <input type="radio" id="output-format-woff" name="output-format" value="woff">
-    <label for="output-format-woff">WOFF</label>
-    <input type="radio" id="output-format-woff2" name="output-format" value="woff2" checked>
-    <label for="output-format-woff2">WOFF2</label>
-  </div>
-  <div id="download-container"></div>
+  <header>
+    <h1><a href="#">Font format converter</a></h1>
+    <div>
+      Convert fonts from/to ttf, otf, woff and woff2.
+    </div>
+  </header>
+
+  <main class="container">
+    <div>
+      <input type="radio" id="output-format-otf" name="output-format" value="otf">
+      <label for="output-format-otf">TTF/OTF</label>
+      <input type="radio" id="output-format-woff" name="output-format" value="woff" checked>
+      <label for="output-format-woff">WOFF</label>
+      <input type="radio" id="output-format-woff2" name="output-format" value="woff2">
+      <label for="output-format-woff2">WOFF2</label>
+    </div>
+    <div id="input-select-zone">
+      <div>
+        <input id="input-file" type="file" style="display:none">
+        <button id="select-file-button">Select a font</button>
+      </div>
+      <div>OR</div>
+      <div id="drop-font-zone">DROP A FONT</div>
+    </div>
+    <div id="spinner" class="spinner-off">Processing...</div>
+    <div id="download-container"></div>
+  </main>
+
+  <footer class="container"></footer>
 </body>
+
 </html>

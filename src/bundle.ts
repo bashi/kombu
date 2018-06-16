@@ -1,6 +1,6 @@
 import { Format, isValidFormat, getFilenameSuffix } from './format';
 
-async function onFileSelected(file: File): Promise<Uint8Array> {
+async function fileToUint8Array(file: File): Promise<Uint8Array> {
   const fileReader = new FileReader();
   const promise = new Promise<Uint8Array>((resolve, reject) => {
     fileReader.addEventListener('load', () => {
@@ -120,14 +120,29 @@ async function convert(data: Uint8Array, format: Format): Promise<Uint8Array> {
 
 document.addEventListener('DOMContentLoaded', async () => {
   const inputFile = document.querySelector('#input-file');
-  if (!inputFile) {
+  if (!(inputFile instanceof HTMLInputElement)) {
     throw new Error('No input-file element');
   }
-  inputFile.addEventListener('change', async e => {
-    const el = inputFile as HTMLInputElement;
-    if (el.files === null || el.files.length !== 1) return;
-    const file = el.files[0];
-    const data = await onFileSelected(file);
+  const selectFileButton = document.querySelector('#select-file-button');
+  if (!selectFileButton) {
+    throw new Error('No select-file-button element');
+  }
+  const downloadEl = document.querySelector('#download-container');
+  if (!downloadEl) {
+    throw new Error('No download container');
+  }
+
+  selectFileButton.addEventListener('click', () => {
+    inputFile.click();
+  });
+
+  const spinner = document.querySelector('#spinner');
+  if (!spinner) {
+    throw new Error('No spinner element');
+  }
+
+  const convertFile = async (file: File) => {
+    const data = await fileToUint8Array(file);
 
     const outputFormatEl = document.querySelector('input[name=output-format]:checked');
     if (!(outputFormatEl instanceof HTMLInputElement)) {
@@ -139,6 +154,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       throw new Error(`Invalid font format: ${format}`);
     }
 
+    downloadEl.innerHTML = '';
+    spinner.classList.remove('spinner-off');
+
     const output = await convert(data, format);
     const link = createDownloadLink(output);
     const basename = getBasename(file.name);
@@ -147,11 +165,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     link.download = `${basename}.${suffix}`;
     link.innerHTML = `Download ${basename}.${suffix}`;
 
-    const downloadEl = document.querySelector('#download-container');
-    if (!downloadEl) {
-      throw new Error('No download container');
-    }
-    downloadEl.innerHTML = '';
     downloadEl.appendChild(link);
+    spinner.classList.add('spinner-off');
+  };
+
+  const inputSelectZone = document.querySelector('#input-select-zone');
+  if (!inputSelectZone) {
+    throw new Error('No input-select-zone element');
+  }
+  inputSelectZone.addEventListener('drop', e => {
+    if (!(e instanceof DragEvent)) return;
+    e.preventDefault();
+    if (!e.dataTransfer.files || e.dataTransfer.files.length !== 1) return;
+    const file = e.dataTransfer.files[0];
+    convertFile(file);
+  });
+
+  inputSelectZone.addEventListener('dragover', e => {
+    e.preventDefault();
+  });
+
+  inputFile.addEventListener('change', e => {
+    const el = inputFile as HTMLInputElement;
+    if (el.files === null || el.files.length !== 1) return;
+    const file = el.files[0];
+    convertFile(file);
   });
 });
