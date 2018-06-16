@@ -20,9 +20,24 @@ button {
   transition: .2s;
 }
 
+button:focus {
+  outline:0;
+}
+
 button:hover {
+  cursor: pointer;
   background: #0067b8;
   color: white;
+}
+
+button[disabled] {
+  color: #ccc;
+  border: solid 2px #ccc;
+}
+
+button[disabled]:hover {
+  cursor: not-allowed;
+  background: white;
 }
 
 a {
@@ -32,6 +47,44 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+.input-radio {
+  display: none;
+}
+
+.input-radio + label {
+  position: relative;
+  padding-left: 20px;
+  padding-right: 10px;
+}
+
+.input-radio + label:before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #0067b8;
+  border-radius: 50%;
+}
+
+.input-radio:checked + label {
+  color: #0067b8;
+}
+
+.input-radio:checked + label::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  background: #0067b8;
+  border-radius: 50%;
 }
 
 .container {
@@ -66,12 +119,22 @@ footer {
 }
 
 #input-select-zone {
-  text-align: center;
-  border: 2px solid #ccc;
-  border-radius: 3px;
-  padding: 1rem;
-  color: #888;
-  font-weight: bold;
+  display: flex;
+  justify-content: center;
+}
+
+#format-select-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+#convert-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .spinner-off {

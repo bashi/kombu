@@ -187,10 +187,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!convertResultEl) {
     throw new Error('No convert result container');
   }
+  const selectedFontInfo = document.querySelector('#selected-font-info');
+  if (!selectedFontInfo) {
+    throw new Error('No selected font info element');
+  }
 
   selectFileButton.addEventListener('click', () => {
     inputFile.click();
   });
+
+  const convertButton = document.querySelector('#convert-button');
+  if (!(convertButton instanceof HTMLButtonElement)) {
+    throw new Error('No convert button element');
+  }
+  convertButton.addEventListener('click', () => {
+    if (selectedFile !== null) {
+      convertFile(selectedFile);
+    }
+  });
+
+  let selectedFile: File | null = null;
+  const fileSelected = (file: File) => {
+    // TODO: Check if the given file is a valid font.
+    const fileSize = formatFilesize(file.size);
+    selectedFontInfo.innerHTML = `${file.name} (${fileSize})`;
+    selectedFile = file;
+    convertButton.disabled = false;
+  };
 
   const spinner = document.querySelector('#spinner');
   if (!spinner) {
@@ -203,6 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const convertFile = async (file: File) => {
+    convertButton.disabled = true;
     errorMessageEl.classList.add('error-message-off');
     try {
       const output = await convertFileInternal(file);
@@ -212,6 +236,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       errorMessageEl.innerHTML = exception.message;
       spinner.classList.add('spinner-off');
       convertResultEl.innerHTML = '';
+    } finally {
+      convertButton.disabled = false;
     }
   };
 
@@ -267,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     if (!e.dataTransfer.files || e.dataTransfer.files.length !== 1) return;
     const file = e.dataTransfer.files[0];
-    convertFile(file);
+    fileSelected(file);
   });
 
   inputSelectZone.addEventListener('dragover', e => {
@@ -278,6 +304,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const el = inputFile as HTMLInputElement;
     if (el.files === null || el.files.length !== 1) return;
     const file = el.files[0];
-    convertFile(file);
+    fileSelected(file);
   });
 });
