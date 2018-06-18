@@ -47,7 +47,7 @@ function createConvertWorker(): Promise<ConvertWorker> {
 }
 
 interface Pending {
-  resolve: (res: any) => void;
+  resolve: (res: Uint8Array) => void;
   reject: (res: any) => void;
 }
 
@@ -80,7 +80,8 @@ class ConvertWorker {
         if (e.data.error) {
           pending.reject(new Error(e.data.error));
         } else {
-          pending.resolve(e.data.response);
+          // TODO: Make sure response has |output|.
+          pending.resolve(e.data.response.output);
         }
         this.pendings.delete(messageId);
         return;
@@ -93,8 +94,7 @@ class ConvertWorker {
     });
   }
 
-  // TODO: Define the return type
-  async convert(data: Uint8Array, format: Format, timeout?: number): Promise<any> {
+  async convert(data: Uint8Array, format: Format, timeout?: number): Promise<Uint8Array> {
     const promise = new Promise<Uint8Array>((resolve, reject) => {
       this.worker.postMessage(
         {
@@ -135,11 +135,11 @@ interface ConvertResult {
 async function convert(data: Uint8Array, format: Format): Promise<ConvertResult> {
   const t0 = performance.now();
   const worker = await createConvertWorker();
-  const res = await worker.convert(data, format);
+  const output = await worker.convert(data, format);
   worker.terminate();
   const t1 = performance.now();
   return {
-    output: res.output,
+    output: output,
     processTime: t1 - t0
   };
 }
