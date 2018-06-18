@@ -1,3 +1,4 @@
+.env
 out/
 *.a
 *.o
@@ -5,5 +6,6 @@ node_modules/
 dist/*.js
 dist/*.wasm
 tmp/
+public/*.html
 public/*.js
 public/*.wasm

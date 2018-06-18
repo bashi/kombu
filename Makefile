@@ -7,8 +7,7 @@ WOFF2_DIR := woff2
 OBJDIR := $(OUTDIR)/obj
 DISTDIR := dist/
 
-all: ffi
-	@:
+.DEFAULT_GOAL := $(FFI_JS)
 
 # brotli
 
@@ -40,7 +39,6 @@ WOFF2_LIB_A := $(OBJDIR)/libwoff2.a
 -include $(WOFF2_DEPS)
 
 $(WOFF2_LIB_A): dirs $(WOFF2_OBJS)
-	rm -f $(WOFF2_LIB_A)
 	emar crs $(WOFF2_LIB_A) $(WOFF2_OBJS)
 
 $(OBJDIR)/%.o: $(WOFF2_DIR)/src/%.cc
@@ -48,10 +46,11 @@ $(OBJDIR)/%.o: $(WOFF2_DIR)/src/%.cc
 
 # ffi
 
+FFI_JS := $(DISTDIR)/ffi.js
 FFI_OBJS := $(FFI_SRCS:%.cc=%.o)
 
-ffi: $(WOFF2_LIB_A) $(BROTLI_LIB_A) ffi.cc
-	emcc $(CXXFLAGS) -I$(WOFF2_DIR)/include ffi.cc -o $(DISTDIR)/ffi.js $(WOFF2_LIB_A) $(BROTLI_LIB_A) \
+$(FFI_JS): $(WOFF2_LIB_A) $(BROTLI_LIB_A) ffi.cc
+	emcc $(CXXFLAGS) -I$(WOFF2_DIR)/include ffi.cc -o $(FFI_JS) $(WOFF2_LIB_A) $(BROTLI_LIB_A) \
 	  -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 \
 	  -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]'
 

@@ -4,10 +4,12 @@
   "description": "A font format converter",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
+    "build": "yarn ffi && yarn ts && yarn webpack && yarn html",
+    "ffi": "emmake make",
+    "ts": "tsc",
+    "ts-watch": "tsc -w",
+    "html": "node build/html.js",
     "copy-ffi": "cp dist/ffi.wasm public/",
-    "bundle": "yarn build && yarn webpack",
     "test": "ava -v test"
   },
   "repository": {
@@ -22,6 +24,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "ava": "^0.25.0",
+    "dotenv": "^6.0.0",
     "typescript": "^2.9.1",
     "webpack": "^4.12.0",
     "webpack-cli": "^3.0.3"
