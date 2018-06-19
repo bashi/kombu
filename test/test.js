@@ -5,10 +5,10 @@ import test from 'ava';
 import * as tag from '../dist/tag';
 import { Reader } from '../dist/reader';
 import { OtfBuilder } from '../dist/otf';
-import { WoffReader, WoffBuilder, WOFF_SIGNATURE } from '../dist/woff';
+import { WoffReader, WoffBuilder } from '../dist/woff';
 import { createWoff2 } from '../dist/woff2';
 import { readAsSfnt, Converter } from '../dist/convert';
-import { getFontFormat } from '../dist/format';
+import { WOFF_SIGNATURE, getFontFormat } from '../dist/format';
 
 function readFileAsUint8Array(pathname) {
   const buffer = fs.readFileSync(pathname);

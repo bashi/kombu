@@ -1,12 +1,6 @@
 // @ts-ignore
 import * as Module from './ffi.js';
 
-const WOFF2_SIGNATURE = 0x774f4632; // wOF2
-
-export function isWoff2Font(version: number): boolean {
-  return version === WOFF2_SIGNATURE;
-}
-
 // TODO: More error handling?
 
 export class Woff2 {

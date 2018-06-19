@@ -2,16 +2,11 @@ import { Sfnt } from './sfnt';
 import { Reader } from './reader';
 import { Writer } from './writer';
 import { stringToTag, calculateTableChecksum } from './tag';
-import { SFNT_HEADER_SIZE, SFNT_TABLE_ENTRY_SIZE, isOtfFont } from './otf';
+import { SFNT_HEADER_SIZE, SFNT_TABLE_ENTRY_SIZE } from './otf';
+import { WOFF_SIGNATURE, isOtfFont } from './format';
 
 // @ts-ignore
 import * as Zlib from 'zlibjs';
-
-export const WOFF_SIGNATURE = 0x774f4646; // 'wOFF'
-
-export function isWoffFont(version: number): boolean {
-  return version === WOFF_SIGNATURE;
-}
 
 export const WOFF_HEADER_SIZE = 44;
 export const WOFF_TABLE_ENTRY_SIZE = 20;

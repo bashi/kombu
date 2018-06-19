@@ -6,27 +6,6 @@ import { tagToString, stringToTag, calculateTableChecksum } from './tag';
 export const SFNT_HEADER_SIZE = 12;
 export const SFNT_TABLE_ENTRY_SIZE = 16;
 
-const SFNT_VERSION_OTTO = 0x4f54544f; // OTTO
-const SFNT_VERSION_TYP1 = 0x74797031; // typ1
-const SFNT_VERSION_TRUE = 0x74727565; // true
-const SFNT_VERSION_V1 = 0x00010000;
-
-export function isOtfFont(version: number): boolean {
-  return (
-    version === SFNT_VERSION_OTTO ||
-    version === SFNT_VERSION_TYP1 ||
-    version === SFNT_VERSION_TRUE ||
-    version === SFNT_VERSION_V1
-  );
-}
-
-export function getOtfFilenameSuffix(version: number): string {
-  if (version === SFNT_VERSION_OTTO) return 'otf';
-  if (version === SFNT_VERSION_TYP1 || version === SFNT_VERSION_TRUE || SFNT_VERSION_V1)
-    return 'ttf';
-  throw new Error(`Invalid font version: ${version}`);
-}
-
 export class OtfReader {
   private reader: Reader;
 

@@ -72,8 +72,8 @@ export class Converter {
     if (format === Format.WOFF) {
       const sfnt = readAsSfnt(data);
       const builder = new OtfBuilder(sfnt);
-      const ttf = builder.build();
-      return this.woff2.compress(ttf);
+      const otf = builder.build();
+      return this.woff2.compress(otf);
     }
     throw new Error(`Unsupported format: ${format}`);
   }
