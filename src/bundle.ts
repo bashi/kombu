@@ -1,4 +1,5 @@
-import { Format, isValidFormat, getFilenameSuffix } from './format';
+import { isValidFormat, getFilenameSuffix } from './format';
+import { convertOnWorker } from './convertworker';
 
 async function fileToUint8Array(file: File): Promise<Uint8Array> {
   const fileReader = new FileReader();
@@ -24,124 +25,6 @@ function getBasename(filename: string): string {
   const suffixPos = filename.lastIndexOf('.');
   if (suffixPos === -1) return filename;
   return filename.substr(0, suffixPos);
-}
-
-const WORKER_INIT_TIMEOUT_MS = 5000;
-
-function createConvertWorker(): Promise<ConvertWorker> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker('worker.js');
-    const timeout = setTimeout(() => reject(new Error('Worker time out')), WORKER_INIT_TIMEOUT_MS);
-    worker.postMessage('init');
-    const listener = (e: MessageEvent) => {
-      if (e.data === 'initialized') {
-        clearTimeout(timeout);
-        worker.removeEventListener('message', listener);
-        resolve(new ConvertWorker(worker));
-      } else if (e.data.name === 'error') {
-        reject(new Error(e.data.message));
-      }
-    };
-    worker.addEventListener('message', listener);
-  });
-}
-
-interface Pending {
-  resolve: (res: Uint8Array) => void;
-  reject: (res: any) => void;
-}
-
-class ConvertWorker {
-  private worker: Worker;
-  private messageId: number;
-  private pendings: Map<number, Pending>;
-  private timeouts: Map<number, number>;
-
-  constructor(worker: Worker) {
-    this.worker = worker;
-    this.messageId = 0;
-    this.pendings = new Map();
-    this.timeouts = new Map();
-
-    this.worker.addEventListener('message', e => {
-      const messageId = e.data.messageId;
-      if (typeof messageId !== 'number') {
-        console.warn(`Received invalid message from worker: ${e}`);
-        return;
-      }
-      const timeout = this.timeouts.get(messageId);
-      if (timeout) {
-        clearTimeout(timeout);
-        this.timeouts.delete(messageId);
-      }
-
-      const pending = this.pendings.get(messageId);
-      if (pending) {
-        if (e.data.error) {
-          pending.reject(new Error(e.data.error));
-        } else {
-          // TODO: Make sure response has |output|.
-          pending.resolve(e.data.response.output);
-        }
-        this.pendings.delete(messageId);
-        return;
-      }
-
-      if (e.data.error) {
-        this.terminate();
-        throw new Error(e.data.error);
-      }
-    });
-  }
-
-  async convert(data: Uint8Array, format: Format, timeout?: number): Promise<Uint8Array> {
-    const promise = new Promise<Uint8Array>((resolve, reject) => {
-      this.worker.postMessage(
-        {
-          messageId: this.messageId,
-          action: 'convert',
-          input: data,
-          format: format
-        },
-        [data.buffer]
-      );
-      this.pendings.set(this.messageId, { resolve: resolve, reject: reject });
-      if (timeout) {
-        this.timeouts.set(
-          this.messageId,
-          setTimeout(() => {
-            this.pendings.delete(this.messageId);
-            reject(new Error('Convert time out'));
-          }, timeout)
-        );
-      }
-      this.messageId += 1;
-    });
-
-    return promise;
-  }
-
-  terminate() {
-    this.worker.terminate();
-  }
-}
-
-interface ConvertResult {
-  output: Uint8Array;
-  processTime: number;
-}
-
-// |data| will be transferred to worker.
-async function convert(data: Uint8Array, format: Format): Promise<ConvertResult> {
-  const t0 = performance.now();
-  const worker = await createConvertWorker();
-  const output = await worker.convert(data, format);
-  worker.terminate();
-  const t1 = performance.now();
-  return {
-    output: output,
-    processTime: t1 - t0
-  };
 }
 
 const BYTE_SUFFIXES = [' B', ' kB', ' MB'];
@@ -205,10 +88,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       convertFile(selectedFile);
     }
   });
+  convertButton.disabled = true;
 
   let selectedFile: File | null = null;
   const fileSelected = (file: File) => {
-    // TODO: Check if the given file is a valid font.
     const fileSize = formatFilesize(file.size);
     selectedFontInfo.innerHTML = `${file.name} (${fileSize})`;
     selectedFile = file;
@@ -258,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     convertResultEl.innerHTML = '';
     spinner.classList.remove('spinner-off');
 
-    const result = await convert(data, format);
+    const result = await convertOnWorker(data, format);
     const output = result.output;
 
     const originalFileSize = formatFilesize(originalByteLength);

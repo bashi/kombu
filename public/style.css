@@ -1,5 +1,6 @@
 :root {
   --max-width: 768px;
+  --primary-color: #0067b8;
 }
 
 html, body {
@@ -13,11 +14,10 @@ button {
   display: inline-block;
   padding: 0.4rem 1rem;
   text-decoration: none;
-  color: #0067b8;
+  color: var(--primary-color);
   background: transparent;
-  border: solid 2px #0067b8;
+  border: solid 2px var(--primary-color);
   border-radius: 2px;
-  transition: .2s;
 }
 
 button:focus {
@@ -26,7 +26,7 @@ button:focus {
 
 button:hover {
   cursor: pointer;
-  background: #0067b8;
+  background: var(--primary-color);
   color: white;
 }
 
@@ -41,7 +41,7 @@ button[disabled]:hover {
 }
 
 a {
-  color: #0067b8;
+  color: var(--primary-color);
   text-decoration: none;
 }
 
@@ -67,12 +67,12 @@ a:hover {
   left: 0;
   width: 14px;
   height: 14px;
-  border: 1px solid #0067b8;
+  border: 1px solid var(--primary-color);
   border-radius: 50%;
 }
 
 .input-radio:checked + label {
-  color: #0067b8;
+  color: var(--primary-color);
 }
 
 .input-radio:checked + label::after {
@@ -83,7 +83,7 @@ a:hover {
   left: 3px;
   width: 10px;
   height: 10px;
-  background: #0067b8;
+  background: var(--primary-color);
   border-radius: 50%;
 }
 
@@ -100,7 +100,7 @@ header {
   max-width: var(--max-width);
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 
 h1 {
@@ -108,8 +108,11 @@ h1 {
 }
 
 header h1 a {
-  color: #555 !important;
-  text-decoration: none !important;
+  color: #555;
+}
+
+header h1 a:hover {
+  text-decoration: none;
 }
 
 footer {
