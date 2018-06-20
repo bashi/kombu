@@ -1,7 +1,7 @@
 module.exports = {
   mode: 'production',
   entry: {
-    bundle: './dist/bundle.js',
+    app: './dist/app.js',
     worker: './dist/worker.js'
   },
   output: {
