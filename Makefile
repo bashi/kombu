@@ -1,4 +1,4 @@
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++11 -Oz
 
 OUTDIR := out
 
@@ -7,7 +7,7 @@ WOFF2_DIR := woff2
 OBJDIR := $(OUTDIR)/obj
 DISTDIR := dist/
 
-.DEFAULT_GOAL := $(FFI_JS)
+.DEFAULT_GOAL := wasm
 
 # brotli
 
@@ -44,14 +44,15 @@ $(WOFF2_LIB_A): dirs $(WOFF2_OBJS)
 $(OBJDIR)/%.o: $(WOFF2_DIR)/src/%.cc
 	$(CXX) -c -MMD $(CXXFLAGS) -I$(BROTLI_DIR)/c/include -I$(WOFF2_DIR)/include -o $@ $<
 
-# ffi
+# wasm
 
 FFI_JS := $(DISTDIR)/ffi.js
 FFI_OBJS := $(FFI_SRCS:%.cc=%.o)
 
-$(FFI_JS): $(WOFF2_LIB_A) $(BROTLI_LIB_A) ffi.cc
+wasm: $(WOFF2_LIB_A) $(BROTLI_LIB_A) ffi.cc
 	emcc $(CXXFLAGS) -I$(WOFF2_DIR)/include ffi.cc -o $(FFI_JS) $(WOFF2_LIB_A) $(BROTLI_LIB_A) \
 	  -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 \
+	  -s EXPORTED_FUNCTIONS='["_malloc", "_free"]' \
 	  -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]'
 
 $(OBJDIR)/%.o: %.cc

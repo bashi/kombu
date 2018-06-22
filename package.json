@@ -4,12 +4,12 @@
   "description": "A font format converter",
   "main": "dist/index.js",
   "scripts": {
-    "build": "yarn ffi && yarn ts && yarn webpack && yarn html",
-    "ffi": "emmake make",
+    "build": "yarn make-wasm && yarn ts && yarn copy-wasm && yarn webpack && yarn html",
+    "make-wasm": "emmake make",
     "ts": "tsc",
     "ts-watch": "tsc -w",
     "html": "node build/html.js",
-    "copy-ffi": "cp dist/ffi.wasm public/",
+    "copy-wasm": "cp dist/ffi.wasm public/",
     "test": "ava -v test"
   },
   "repository": {
