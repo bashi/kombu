@@ -1,4 +1,4 @@
-import { Format, isValidFormat } from './format';
+import { Format, getFontFormat, isValidFormat } from './format';
 import { Converter } from './convert';
 import { Woff2, createWoff2 } from './woff2';
 
@@ -19,7 +19,7 @@ function convert(converter: Converter, data: Uint8Array, format: Format): Uint8A
   } else if (format === Format.WOFF2) {
     return converter.toWoff2(data);
   } else {
-    throw new Error(`Unsupported format: ${format}`);
+    throw new Error('Unsupported output file format');
   }
 }
 
@@ -34,9 +34,13 @@ function handleMessage(messageId: number, e: MessageEvent) {
   if (action === 'convert') {
     const format = e.data.format;
     if (!isValidFormat(format)) {
-      throw new Error(`Invalid font format: ${format}`);
+      throw new Error(`Invalid output font format: ${format}`);
     }
     const input = e.data.input;
+    const inputFormat = getFontFormat(input);
+    if (inputFormat === Format.UNSUPPORTED) {
+      throw new Error(`Unsupported font`);
+    }
     const output = convert(converter, input, format);
     const response = {
       output: output
@@ -69,6 +73,7 @@ self.addEventListener('message', async e => {
   try {
     handleMessage(messageId, e);
   } catch (exception) {
+    console.error(exception);
     // @ts-ignore: self is DedicatedWorkerGlobalScope
     self.postMessage({ messageId: messageId, error: exception.message });
   }
