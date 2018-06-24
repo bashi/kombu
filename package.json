@@ -4,11 +4,11 @@
   "description": "A font format converter",
   "main": "dist/index.js",
   "scripts": {
-    "build": "yarn make-wasm && yarn ts && yarn copy-wasm && yarn webpack && yarn html",
-    "make-wasm": "emmake make",
+    "build-production": "yarn ts && yarn webpack --mode production && NODE_ENV=production yarn html",
     "ts": "tsc",
     "ts-watch": "tsc -w",
     "html": "node build/html.js",
+    "make-wasm": "emmake make && yarn copy-wasm",
     "copy-wasm": "cp dist/ffi.wasm public/",
     "test": "ava -v test"
   },
@@ -17,8 +17,9 @@
     "url": "git+https://github.com/bashi/kombu.git"
   },
   "keywords": [
-    "woff2",
-    "opentype"
+    "opentype",
+    "woff",
+    "woff2"
   ],
   "author": "Kenichi Ishibashi <ishibashi.kenichi@gmail.com>",
   "license": "Apache-2.0",

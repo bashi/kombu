@@ -4,6 +4,7 @@ out/
 *.o
 node_modules/
 dist/*.js
+dist/*.map
 dist/*.wasm
 tmp/
 public/*.html

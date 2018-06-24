@@ -35,7 +35,7 @@ export class Woff2 {
     if (outSize === 0) {
       throw new Error('woff2: Failed to compress');
     }
-    const res = this.mod.HEAPU8.subarray(outOffset, outOffset + outSize);
+    const res = this.mod.HEAPU8.subarray(outOffset, outOffset + outSize).slice(0);
 
     this.mod._free(inOffset);
     this.mod._free(outOffset);
@@ -66,7 +66,7 @@ export class Woff2 {
     if (outSize === 0) {
       throw new Error('woff2: Failed to uncompress');
     }
-    const res = this.mod.HEAPU8.subarray(outOffset, outOffset + outSize);
+    const res = this.mod.HEAPU8.subarray(outOffset, outOffset + outSize).slice(0);
 
     this.mod._free(inOffset);
     this.mod._free(outOffset);

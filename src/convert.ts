@@ -36,7 +36,8 @@ export class Converter {
     const format = getFontFormat(data);
     if (format === Format.OTF) return data;
     if (format === Format.WOFF2) {
-      return this.woff2.uncompress(data);
+      const uncompressed = this.woff2.uncompress(data);
+      return uncompressed;
     }
     if (format === Format.WOFF) {
       const sfnt = readAsSfnt(data);

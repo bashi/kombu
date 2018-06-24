@@ -105,6 +105,13 @@ export interface ConvertResult {
   processTime: number;
 }
 
+let defaultWorker: ConvertWorker | null = null;
+async function getDefaultWorker(): Promise<ConvertWorker> {
+  if (defaultWorker) return defaultWorker;
+  defaultWorker = await createConvertWorker();
+  return defaultWorker;
+}
+
 /**
  * Convert a font on a worker.
  * @param data font data. This will be transferred to worker.
@@ -112,9 +119,8 @@ export interface ConvertResult {
  */
 export async function convertOnWorker(data: Uint8Array, format: Format): Promise<ConvertResult> {
   const t0 = performance.now();
-  const worker = await createConvertWorker();
+  const worker = await getDefaultWorker();
   const output = await worker.convert(data, format);
-  worker.terminate();
   const t1 = performance.now();
   return {
     output: output,

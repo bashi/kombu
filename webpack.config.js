@@ -1,5 +1,5 @@
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: {
     app: './dist/app.js',
     worker: './dist/worker.js'
