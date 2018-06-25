@@ -9,6 +9,14 @@
 </head>
 
 <body>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js');
+      });
+    }
+  </script>
+
   <header>
     <h1><a href="#">OTF/WOFF/WOFF2 Converter</a></h1>
     <div>
