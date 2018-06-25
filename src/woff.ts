@@ -116,8 +116,7 @@ export class WoffReader {
     return uncompressed;
   }
 
-  // TODO: Make this private
-  readTable(entry: TableEntry): Uint8Array {
+  private readTable(entry: TableEntry): Uint8Array {
     const tableData = this.readTableData(entry);
     if (entry.tag !== TAG_HEAD) {
       const checksum = calculateTableChecksum(tableData);

@@ -6,6 +6,21 @@ import { tagToString, stringToTag, calculateTableChecksum } from './tag';
 export const SFNT_HEADER_SIZE = 12;
 export const SFNT_TABLE_ENTRY_SIZE = 16;
 
+interface OffsetTable {
+  sfntVersion: number;
+  numTables: number;
+  searchRange: number;
+  entrySelector: number;
+  rangeShift: number;
+}
+
+interface TableRecord {
+  tag: number;
+  checksum: number;
+  offset: number;
+  length: number;
+}
+
 export class OtfReader {
   private reader: Reader;
 
@@ -21,7 +36,7 @@ export class OtfReader {
     return sfnt;
   }
 
-  private readOffsetTable(): any {
+  private readOffsetTable(): OffsetTable {
     const offsetTable = {
       sfntVersion: this.reader.readULong(),
       numTables: this.reader.readUShort(),
@@ -32,7 +47,7 @@ export class OtfReader {
     return offsetTable;
   }
 
-  private readTableRecords(numTables: number): Array<any> {
+  private readTableRecords(numTables: number): Array<TableRecord> {
     const records = [];
     for (let i = 0; i < numTables; i++) {
       const r = {
@@ -46,7 +61,7 @@ export class OtfReader {
     return records;
   }
 
-  private readTables(sfnt: Sfnt, records: Array<any>) {
+  private readTables(sfnt: Sfnt, records: Array<TableRecord>) {
     for (let i = 0; i < records.length; i++) {
       const r = records[i];
       const tagStr = tagToString(r.tag);
