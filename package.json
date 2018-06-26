@@ -1,10 +1,10 @@
 {
   "name": "kombu",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A font format converter",
-  "main": "dist/index.js",
   "scripts": {
-    "build-production": "yarn ts && yarn webpack --mode production && NODE_ENV=production yarn html",
+    "build:production": "yarn ts && yarn webpack --mode production && NODE_ENV=production yarn html",
+    "build": "yarn ts && yarn webpack && yarn html",
     "ts": "tsc",
     "ts-watch": "tsc -w",
     "html": "node build/html.js",
