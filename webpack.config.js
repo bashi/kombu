@@ -12,7 +12,13 @@ module.exports = {
   },
   plugins: [
     new WorkboxPlugin.GenerateSW({
-      swDest: __dirname + '/public/service-worker.js'
+      swDest: __dirname + '/public/service-worker.js',
+      runtimeCaching: [
+        {
+          urlPattern: /\.(?:wasm|js|html|css)$/,
+          handler: 'cacheFirst'
+        }
+      ]
     })
   ],
   node: {
