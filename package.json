@@ -1,7 +1,7 @@
 {
   "name": "kombu",
-  "version": "0.1.1",
-  "description": "A font format converter",
+  "version": "0.1.3",
+  "description": "OpenType/WOFF/WOFF2 converter",
   "scripts": {
     "build:production": "yarn ts && yarn webpack --mode production && NODE_ENV=production yarn html",
     "build": "yarn ts && yarn webpack && yarn html",
