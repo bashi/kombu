@@ -116,10 +116,13 @@ header h1 a:hover {
 }
 
 footer {
-  color: #ccc;
   margin: 2rem 0 1rem 0;
   font-size: 0.9rem;
   text-align: center;
+}
+
+#version {
+  color: #ccc;
 }
 
 #input-select-zone {
