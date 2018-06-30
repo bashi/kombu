@@ -49,7 +49,23 @@
     </div>
 
     <div id="spinner" class="spinner-off">
-      <div>Processing...</div>
+      <div style="display: flex; align-items: center">
+        <span>Converting</span>
+        <!-- https://codepen.io/aurer/pen/jEGbA -->
+        <svg version="1.1" id="spinner-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          width="24px" height="24px" viewBox="0 0 24 24" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+          <rect x="0" y="2" width="4" height="18" fill="#333">
+            <animate attributeName="opacity" attributeType="XML" values="1; .2; 1" begin="0s" dur="2s" repeatCount="indefinite" />
+          </rect>
+          <rect x="7" y="2" width="4" height="18" fill="#333">
+            <animate attributeName="opacity" attributeType="XML" values="1; .2; 1" begin="0.6s" dur="2s" repeatCount="indefinite" />
+          </rect>
+          <rect x="14" y="2" width="4" height="18" fill="#333">
+            <animate attributeName="opacity" attributeType="XML" values="1; .2; 1" begin="1.2s" dur="2s" repeatCount="indefinite" />
+          </rect>
+        </svg>
+      </div>
+
       <div>It may take several minutes when you convert a large font.</div>
     </div>
     <div id="convert-result-container"></div>

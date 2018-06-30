@@ -148,6 +148,10 @@ footer {
   display: none;
 }
 
+#spinner-icon {
+  margin-left: 4px;
+}
+
 #error-message-container {
   font-weight: bold;
   color: red;
