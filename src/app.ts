@@ -53,8 +53,17 @@ function formatProcessTime(t: number): string {
 }
 
 function formatConversionRatio(before: number, after: number): string {
+  const el = document.createElement('span');
   const ratio = (after / before) * 100;
-  return ratio.toFixed(1) + '%';
+  el.innerText = ratio.toFixed(1);
+  if (ratio < 100) {
+    el.style.color = 'green';
+    el.style.fontWeight = 'bold';
+  } else if (ratio > 100) {
+    el.style.color = 'red';
+    el.style.fontWeight = 'bold';
+  }
+  return el.outerHTML;
 }
 
 // TODO: Avoid a god object.
@@ -177,8 +186,9 @@ class App {
     const ratio = formatConversionRatio(originalByteLength, output.byteLength);
 
     const summaryEl = document.createElement('div');
+
     summaryEl.innerHTML = `
-    <div>Size comparison: ${originalFileSize} → ${convertedFileSize} (${ratio})</div>
+    <div>Size comparison: ${originalFileSize} → ${convertedFileSize} (${ratio}%)</div>
     <div>Process time: ${processTime}</div>
     `;
     this.convertResultEl.appendChild(summaryEl);
