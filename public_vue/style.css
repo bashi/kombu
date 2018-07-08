@@ -1,0 +1,162 @@
+:root {
+  --max-width: 768px;
+  --primary-color: #0067b8;
+}
+
+html, body {
+  font-family: 'Open Sans', sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+button {
+  font-size: 1rem;
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  text-decoration: none;
+  color: var(--primary-color);
+  background: transparent;
+  border: solid 2px var(--primary-color);
+  border-radius: 2px;
+}
+
+button:focus {
+  outline:0;
+}
+
+button:hover {
+  cursor: pointer;
+  background: var(--primary-color);
+  color: white;
+}
+
+button[disabled] {
+  color: #ccc;
+  border: solid 2px #ccc;
+}
+
+button[disabled]:hover {
+  cursor: not-allowed;
+  background: white;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.input-radio {
+  display: none;
+}
+
+.input-radio + label {
+  position: relative;
+  padding-left: 20px;
+  padding-right: 10px;
+}
+
+.input-radio + label:before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--primary-color);
+  border-radius: 50%;
+}
+
+.input-radio:checked + label {
+  color: var(--primary-color);
+}
+
+.input-radio:checked + label::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  background: var(--primary-color);
+  border-radius: 50%;
+}
+
+.container {
+  padding: 0 2rem 0 2rem;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+header {
+  color: #555;
+  padding: 0 2rem 0 2rem;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  margin-bottom: 0;
+}
+
+header h1 a {
+  color: #555;
+}
+
+header h1 a:hover {
+  text-decoration: none;
+}
+
+footer {
+  margin: 2rem 0 1rem 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+#version {
+  color: #ccc;
+}
+
+#input-select-zone {
+  display: flex;
+  justify-content: center;
+}
+
+#format-select-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+#convert-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.spinner-off {
+  display: none;
+}
+
+#spinner-icon {
+  margin-left: 6px;
+}
+
+#error-message-container {
+  font-weight: bold;
+  color: red;
+}
+
+.error-message-off {
+  display: none;
+}

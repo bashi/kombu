@@ -11,3 +11,4 @@ tmp/
 public/*.html
 public/*.js
 public/*.wasm
+public_vue/*.js
