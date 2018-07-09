@@ -3,14 +3,12 @@
   "version": "0.1.4",
   "description": "OpenType/WOFF/WOFF2 converter",
   "scripts": {
-    "build:production": "yarn ts && yarn webpack --mode production && NODE_ENV=production yarn html",
-    "build": "yarn ts && yarn webpack && yarn html",
-    "ts": "tsc",
-    "ts-watch": "tsc -w",
+    "build:production": "yarn webpack --mode production && NODE_ENV=production yarn html",
+    "build": "yarn webpack && yarn html",
     "html": "node build/html.js",
     "make-wasm": "emmake make && yarn copy-wasm",
     "copy-wasm": "cp dist/ffi.wasm public/",
-    "test": "ava -v test"
+    "test": "tsc && ava -v test"
   },
   "repository": {
     "type": "git",
@@ -25,7 +23,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "ava": "^0.25.0",
-    "dotenv": "^6.0.0",
+    "ts-loader": "^4.4.2",
     "typescript": "^2.9.1",
     "webpack": "^4.12.0",
     "webpack-cli": "^3.0.3",

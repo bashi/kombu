@@ -1,18 +1,25 @@
+const path = require('path');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = {
   mode: 'development',
   entry: {
-    app: './dist/app.js',
-    worker: './dist/worker.js'
+    app: './src/app.ts',
+    worker: './src/worker.ts'
   },
   output: {
-    path: __dirname + '/public',
+    path: path.resolve(__dirname, 'public'),
     filename: '[name].js'
+  },
+  resolve: {
+    extensions: ['.ts', 'js']
+  },
+  module: {
+    rules: [{ test: /\.ts$/, loader: 'ts-loader' }]
   },
   plugins: [
     new WorkboxPlugin.GenerateSW({
-      swDest: __dirname + '/public/service-worker.js',
+      swDest: path.resolve(__dirname, 'public/service-worker.js'),
       runtimeCaching: [
         {
           urlPattern: /\.(?:wasm|js|html|css)$/,
