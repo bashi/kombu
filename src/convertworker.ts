@@ -9,7 +9,7 @@ class ConvertWorker {
   private worker: Worker;
   private messageId: number;
   private pendings: Map<number, Pending>;
-  private timeouts: Map<number, number>;
+  private timeouts: Map<number, any>;
 
   constructor(worker: Worker) {
     this.worker = worker;
