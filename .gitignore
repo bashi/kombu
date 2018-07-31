@@ -1,5 +1,6 @@
 .env
 .firebaserc
+.vscode
 out/
 *.a
 *.o

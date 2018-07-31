@@ -5,7 +5,12 @@ async function fileToUint8Array(file: File): Promise<Uint8Array> {
   const fileReader = new FileReader();
   const promise = new Promise<Uint8Array>((resolve, reject) => {
     fileReader.addEventListener('load', () => {
-      resolve(new Uint8Array(fileReader.result));
+      const result = fileReader.result;
+      if (result instanceof ArrayBuffer) {
+        resolve(new Uint8Array(result));
+      } else {
+        throw new Error('readAsArrayBuffer() returns non ArrayBuffer result');
+      }
     });
     fileReader.addEventListener('error', e => reject(e));
   });

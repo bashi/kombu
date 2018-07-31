@@ -8,6 +8,6 @@
       "target": "es2015"
   },
   "exclude": [
-    "tmp", "woff2", "node_modules", "out"
+    "woff2", "node_modules"
   ]
 }
