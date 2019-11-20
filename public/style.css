@@ -137,6 +137,16 @@ footer {
   margin-bottom: 1rem;
 }
 
+.convert-summary {
+  margin-bottom: 1rem;
+}
+
+#convert-result-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 #convert-button-container {
   display: flex;
   justify-content: center;

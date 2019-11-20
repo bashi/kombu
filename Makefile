@@ -1,3 +1,6 @@
+CC := emcc
+CXX := emcc
+
 CXXFLAGS += -std=c++11 -Oz
 
 OUTDIR := out
@@ -15,7 +18,7 @@ BROTLI_DIR := $(WOFF2_DIR)/brotli
 BROTLI_LIB_A := $(BROTLI_DIR)/libbrotli.a
 
 $(BROTLI_LIB_A):
-	$(MAKE) -C $(BROTLI_DIR) lib
+	CC=$(CC) $(MAKE) -C $(BROTLI_DIR) lib
 
 # woff2
 
@@ -42,7 +45,7 @@ $(WOFF2_LIB_A): dirs $(WOFF2_OBJS)
 	emar crs $(WOFF2_LIB_A) $(WOFF2_OBJS)
 
 $(OBJDIR)/%.o: $(WOFF2_DIR)/src/%.cc
-	$(CXX) -c -MMD $(CXXFLAGS) -I$(BROTLI_DIR)/c/include -I$(WOFF2_DIR)/include -o $@ $<
+	emcc -c -MMD $(CXXFLAGS) -I$(BROTLI_DIR)/c/include -I$(WOFF2_DIR)/include -o $@ $<
 
 # wasm
 
@@ -56,7 +59,7 @@ wasm: $(WOFF2_LIB_A) $(BROTLI_LIB_A) ffi.cc
 	  -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]'
 
 $(OBJDIR)/%.o: %.cc
-	$(CXX) -c -MMD $(CXXFLAGS) -I$(BROTLI_DIR)/c/include -I$(WOFF2_DIR)/include -o $@ $<
+	emcc -c -MMD $(CXXFLAGS) -I$(BROTLI_DIR)/c/include -I$(WOFF2_DIR)/include -o $@ $<
 
 # others
 

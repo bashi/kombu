@@ -18,12 +18,45 @@ async function fileToUint8Array(file: File): Promise<Uint8Array> {
   return promise;
 }
 
-function createDownloadLink(data: Uint8Array): HTMLAnchorElement {
+function createDownloadLink(basename: string, data: Uint8Array): HTMLAnchorElement {
   const blob = new Blob([data]);
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
+  const suffix = getFilenameSuffix(data);
+  link.download = `${basename}.${suffix}`;
+  link.innerHTML = `Download ${basename}.${suffix}`;
   return link;
+}
+
+function createWriteFileButton(basename: string, data: Uint8Array): HTMLElement {
+  const suffix = getFilenameSuffix(data);
+  const button = document.createElement('button');
+  button.innerHTML = `Download ${basename}.${suffix}`;
+
+  const listener = async () => {
+    button.removeEventListener('click', listener);
+    const opts = {
+      type: 'saveFile',
+      multiple: false,
+      accepts: [
+        {
+          description: 'Font file',
+          extensions: [suffix],
+          mimeTypes: [`font/${suffix}`]
+        }
+      ]
+    };
+    // @ts-ignore
+    const writeHandle = await window.chooseFileSystemEntries(opts);
+    const writer = await writeHandle.createWriter();
+    await writer.truncate(0);
+    await writer.write(0, data.buffer);
+    await writer.close();
+  };
+
+  button.addEventListener('click', listener);
+  return button;
 }
 
 function getBasename(filename: string): string {
@@ -83,6 +116,9 @@ class App {
 
   selectedFile: File | undefined;
 
+  // Need to keep a reference to the file handle to perform file operations.
+  nativeFileSystemHandle: any;
+
   constructor() {
     const inputFileEl = document.querySelector('#input-file');
     if (!(inputFileEl instanceof HTMLInputElement)) {
@@ -124,20 +160,40 @@ class App {
     this.convertButton.disabled = true;
 
     this.selectedFile = undefined;
+    this.nativeFileSystemHandle = undefined;
 
-    this.inputFileEl.addEventListener('change', e => {
-      if (this.inputFileEl.files === null) return;
-      if (this.inputFileEl.files.length !== 1) {
-        console.warn('Multiple input files not supported');
-        return;
-      }
-      this.onFileSelected(this.inputFileEl.files[0]);
+    this.selectFileButton.addEventListener('click', async () => {
+      const file = await this.chooseFile();
+      this.onFileSelected(file);
     });
-    this.selectFileButton.addEventListener('click', () => {
-      this.inputFileEl.click();
-    });
+
     this.convertButton.addEventListener('click', () => {
       this.convertSelectedFile();
+    });
+  }
+
+  private async chooseFile(): Promise<File> {
+    if ('chooseFileSystemEntries' in window) {
+      // @ts-ignore
+      this.nativeFileSystemHandle = await window.chooseFileSystemEntries();
+      return this.nativeFileSystemHandle.getFile();
+    }
+
+    return new Promise((resolve, reject) => {
+      const listener = () => {
+        this.inputFileEl.removeEventListener('change', listener);
+        if (this.inputFileEl.files === null) {
+          reject('No file specified');
+          return;
+        }
+        if (this.inputFileEl.files.length !== 1) {
+          reject('Multiple input files not supported');
+          return;
+        }
+        resolve(this.inputFileEl.files[0]);
+      };
+      this.inputFileEl.addEventListener('change', listener);
+      this.inputFileEl.click();
     });
   }
 
@@ -154,6 +210,7 @@ class App {
     try {
       await this.convertFileInternal();
     } catch (exception) {
+      console.error(exception);
       this.errorMessageEl.classList.remove('error-message-off');
       this.errorMessageEl.innerHTML = exception.message;
       this.spinnerEl.classList.add('spinner-off');
@@ -191,6 +248,7 @@ class App {
     const ratio = formatConversionRatio(originalByteLength, output.byteLength);
 
     const summaryEl = document.createElement('div');
+    summaryEl.classList.add('convert-summary');
 
     summaryEl.innerHTML = `
     <div>Size comparison: ${originalFileSize} → ${convertedFileSize} (${ratio}%)</div>
@@ -198,14 +256,15 @@ class App {
     `;
     this.convertResultEl.appendChild(summaryEl);
 
-    const link = createDownloadLink(output);
     const basename = getBasename(this.selectedFile.name);
+    if ('chooseFileSystemEntries' in window) {
+      const button = createWriteFileButton(basename, output);
+      this.convertResultEl.appendChild(button);
+    } else {
+      const link = createDownloadLink(basename, output);
+      this.convertResultEl.appendChild(link);
+    }
 
-    const suffix = getFilenameSuffix(output);
-    link.download = `${basename}.${suffix}`;
-    link.innerHTML = `Download ${basename}.${suffix}`;
-
-    this.convertResultEl.appendChild(link);
     this.spinnerEl.classList.add('spinner-off');
   }
 }
