@@ -23,7 +23,7 @@ module.exports = {
       runtimeCaching: [
         {
           urlPattern: /\.(?:wasm|js|html|css)$/,
-          handler: 'cacheFirst'
+          handler: 'staleWhileRevalidate'
         }
       ]
     })
