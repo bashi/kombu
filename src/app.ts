@@ -118,6 +118,7 @@ class App {
 
   // Need to keep a reference to the file handle to perform file operations.
   nativeFileSystemHandle: any;
+  useNativeFileSystemApiForSave: boolean;
 
   constructor() {
     const inputFileEl = document.querySelector('#input-file');
@@ -161,6 +162,10 @@ class App {
 
     this.selectedFile = undefined;
     this.nativeFileSystemHandle = undefined;
+    // Don't use native filesystem API to save converted fonts because it
+    // doesn't provide a way to specify default file name.
+    // https://github.com/WICG/native-file-system/issues/80
+    this.useNativeFileSystemApiForSave = false;
 
     this.selectFileButton.addEventListener('click', async () => {
       const file = await this.chooseFile();
@@ -257,7 +262,7 @@ class App {
     this.convertResultEl.appendChild(summaryEl);
 
     const basename = getBasename(this.selectedFile.name);
-    if ('chooseFileSystemEntries' in window) {
+    if ('chooseFileSystemEntries' in window && this.useNativeFileSystemApiForSave) {
       const button = createWriteFileButton(basename, output);
       this.convertResultEl.appendChild(button);
     } else {
