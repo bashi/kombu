@@ -1,6 +1,6 @@
 {
   "name": "kombu",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "OpenType/WOFF/WOFF2 converter",
   "scripts": {
     "build:production": "webpack --mode production && NODE_ENV=production yarn html",
