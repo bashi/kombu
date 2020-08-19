@@ -1,4 +1,4 @@
-import { isValidFormat, getFilenameSuffix } from './format';
+import { Format, isValidFormat, getFilenameSuffix } from './format';
 import { convertOnWorker } from './convertworker';
 
 async function fileToUint8Array(file: File): Promise<Uint8Array> {
@@ -84,7 +84,7 @@ class App {
   spinnerEl: Element;
   errorMessageEl: Element;
 
-  selectedFile: File | undefined;
+  selectedFiles: FileList | undefined;
 
   constructor() {
     const inputFileEl = document.querySelector('#input-file');
@@ -126,65 +126,49 @@ class App {
 
     this.convertButton.disabled = true;
 
-    this.selectedFile = undefined;
+    this.selectedFiles = undefined;
 
     this.selectFileButton.addEventListener('click', async () => {
-      const file = await this.chooseFile();
-      this.onFileSelected(file);
+      const files = await this.chooseFiles();
+      this.onFilesSelected(files);
     });
 
     this.convertButton.addEventListener('click', () => {
-      this.convertSelectedFile();
+      this.startConversions();
     });
   }
 
-  private async chooseFile(): Promise<File> {
+  private async chooseFiles(): Promise<FileList> {
     return new Promise((resolve, reject) => {
       const listener = () => {
         this.inputFileEl.removeEventListener('change', listener);
-        if (this.inputFileEl.files === null) {
+        if (this.inputFileEl.files === null || this.inputFileEl.files.length === 0) {
           reject('No file specified');
           return;
         }
-        if (this.inputFileEl.files.length !== 1) {
-          reject('Multiple input files not supported');
-          return;
-        }
-        resolve(this.inputFileEl.files[0]);
+        resolve(this.inputFileEl.files);
       };
       this.inputFileEl.addEventListener('change', listener);
       this.inputFileEl.click();
     });
   }
 
-  private onFileSelected(file: File) {
-    const fileSize = formatFilesize(file.size);
-    this.selectedFontInfoEl.innerHTML = `${file.name} (${fileSize})`;
-    this.selectedFile = file;
+  private onFilesSelected(files: FileList) {
+    this.selectedFontInfoEl.innerHTML = '';
+
+    for (let file of files) {
+      const fileSize = formatFilesize(file.size);
+      let el = document.createElement('div');
+      el.innerHTML = `${file.name} (${fileSize})`;
+      this.selectedFontInfoEl.appendChild(el);
+    }
+
+    this.selectedFiles = files;
     this.convertButton.disabled = false;
   }
 
-  private async convertSelectedFile() {
-    this.convertButton.disabled = true;
-    this.errorMessageEl.classList.add('error-message-off');
-    try {
-      await this.convertFileInternal();
-    } catch (exception) {
-      console.error(exception);
-      this.errorMessageEl.classList.remove('error-message-off');
-      this.errorMessageEl.innerHTML = exception.message;
-      this.spinnerEl.classList.add('spinner-off');
-      this.convertResultEl.innerHTML = '';
-    } finally {
-      this.convertButton.disabled = false;
-    }
-  }
-
-  private async convertFileInternal() {
-    if (this.selectedFile === undefined) return;
-
-    const data = await fileToUint8Array(this.selectedFile);
-    const originalByteLength = data.byteLength;
+  private async startConversions() {
+    if (this.selectedFiles === undefined) return;
 
     const outputFormatEl = document.querySelector('input[name=output-format]:checked');
     if (!(outputFormatEl instanceof HTMLInputElement)) {
@@ -196,9 +180,32 @@ class App {
       throw new Error(`Invalid font format: ${format}`);
     }
 
+    this.convertButton.disabled = true;
+
+    // Clear conversion status.
     this.convertResultEl.innerHTML = '';
+    this.errorMessageEl.innerHTML = '';
+    this.errorMessageEl.classList.add('error-message-off');
     this.spinnerEl.classList.remove('spinner-off');
 
+    try {
+      for (let file of this.selectedFiles) {
+        await this.convertSingleFile(file, format);
+      }
+    } catch (exception) {
+      console.error(exception);
+      this.errorMessageEl.innerHTML = exception.message;
+      this.errorMessageEl.classList.remove('error-message-off');
+      this.convertResultEl.innerHTML = '';
+    } finally {
+      this.spinnerEl.classList.add('spinner-off');
+      this.convertButton.disabled = false;
+    }
+  }
+
+  private async convertSingleFile(file: File, format: Format) {
+    const data = await fileToUint8Array(file);
+    const originalByteLength = data.byteLength;
     const result = await convertOnWorker(data, format);
     const output = result.output;
 
@@ -216,11 +223,9 @@ class App {
     `;
     this.convertResultEl.appendChild(summaryEl);
 
-    const basename = getBasename(this.selectedFile.name);
+    const basename = getBasename(file.name);
     const link = createDownloadLink(basename, output);
     this.convertResultEl.appendChild(link);
-
-    this.spinnerEl.classList.add('spinner-off');
   }
 }
 
