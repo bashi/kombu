@@ -105,6 +105,7 @@ header {
 
 h1 {
   margin-bottom: 0;
+  font-weight: normal;
 }
 
 header h1 a {
